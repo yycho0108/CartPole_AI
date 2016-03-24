@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <string>
 
 enum : char {RELEASED, PRESSED, REPEATED};
 
@@ -17,22 +18,38 @@ private:
 	int kbd;
 	input_event ev;
 	Board<n,m> board;
+	std::string who;
 public:
-	GameManager(){
-		kbd = open("/dev/input/by-path/platform-i8042-serio-0-event-kbd",O_RDONLY); //read keyboard
-		if(kbd == -1){
-			fprintf(stderr,"Cannot open device: %s.\n", strerror(errno));
-			close(kbd);
-			throw("CANNOT OPEN DEVICE");
+	GameManager(std::string who):who(who){
+		for(auto& c : who){
+			c = std::tolower(c);
 		}
+		if(who == "kb"){
+			kbd = open("/dev/input/by-path/platform-i8042-serio-0-event-kbd",O_RDONLY); //read keyboard
+			if(kbd == -1){
+				fprintf(stderr,"Cannot open device: %s.\n", strerror(errno));
+				close(kbd);
+				throw("CANNOT OPEN DEVICE");
+			}
+		}else if (who == "ai"){
+			//AI SETUP CODE HERE
+		}
+
 		board.randTile();	
 		board.randTile();	
 		board.print();
 	}
 	~GameManager(){
-		close(kbd);
+		if(who == "kb")
+			close(kbd);
 	}
-	bool kbread(DIR& dir){
+	bool read(DIR& dir){
+		if(who == "kb")
+			return KBread(dir);
+		else if (who == "ai")
+			return AIread(dir);
+	}
+	bool KBread(DIR& dir){
 		dir = X;
 		ssize_t bytes = read(kbd,&ev,sizeof(ev));
 		
@@ -68,10 +85,17 @@ public:
 		}
 		return true;
 	}
+	bool AIread(DIR& dir){
+		dir = X;
+		//not yet implemented
+		return false;
+	}
 	void run(){
 		DIR dir = X;
-		while(kbread(dir)){
-			if(dir != X){
+		while(read(dir)){
+			if(dir == X){
+				//new episode
+			}else{
 				board.next(dir);
 				board.print();
 				cout << endl;

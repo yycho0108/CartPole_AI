@@ -6,4 +6,9 @@ Actions:
 States:
 16 numbers (for 4X4 grid)
 
+- [x] Board Complete
+- [x] Game Logic Complete (for verification)
+- [ ] Q-Learning Agent Implementation
 
+---
+![Running](images/game.png)

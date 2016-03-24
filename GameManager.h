@@ -13,29 +13,32 @@
 
 enum : char {RELEASED, PRESSED, REPEATED};
 
+std::vector<int> topology(int n, int m){
+	return std::vector<int>({n*m,n*m/2,4});
+}
+
 template<int n, int m>
 class GameManager{
 private:
 	int kb;
-	Agent ai;
+	Agent<n,m> ai;
 	input_event ev;
 	Board<n,m> board;
 	std::string who;
 public:
-	GameManager(std::string who):who(who),ai(std::vector<int>({n*m,n*m/2,4})){
+	GameManager(std::string who):who(who),ai(topology(n,m)){
 		for(auto& c : who){
 			c = std::tolower(c);
 		}
 		if(who == "kb"){
-			kb = open("/dev/input/by-path/platform-i8042-serio-0-event-kbd",O_RDONLY); //read keyboard
+			const char* dev = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
+			kb = open(dev,O_RDONLY); //read keyboard
 			if(kb == -1){
-				fprintf(stderr,"Cannot open device: %s.\n", strerror(errno));
+				fprintf(stderr,"Cannot open device %s: %s.\n", dev,strerror(errno));
 				close(kb);
 				throw("CANNOT OPEN DEVICE");
 			}
 		}else if (who == "ai"){
-			std::vector<int> t({n*m,n*m/2,4}); //topology
-			ai = Agent(t);
 			//AI SETUP CODE HERE
 		}
 
@@ -47,6 +50,8 @@ public:
 		if(who == "kb")
 			close(kb);
 	}
+
+
 	bool CMDread(DIR& dir){
 		if(who == "kb")
 			return KBread(dir);
@@ -90,9 +95,9 @@ public:
 		return true;
 	}
 	bool AIread(DIR& dir){
-		dir = X;
+		dir = ai.getNext(board);
 		//not yet implemented
-		return false;
+		return true;
 	}
 	void run(){
 		DIR dir = X;

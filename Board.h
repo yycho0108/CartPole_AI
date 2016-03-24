@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <bitset>
 #include <boost/utility/binary.hpp>
+#include <string.h>
 
 #include <algorithm>
 
@@ -74,24 +75,31 @@ public:
 		update(); //whenever a query occurs, update if necessary
 		return _repr;
 	}
+	void ifnext(DIR dir, char board[n][m]){
+		memcpy(board,_board,sizeof(board));
+		next(dir, board);
+	}
 	void next(DIR dir){
+		next(dir, _board);
+	}
+	void next(DIR dir, char board[n][m]){
 		bool addTile = false;
 		switch(dir){
 			case R:
 				for(int i=0;i<n;++i){
 					for(int j=m-1;j>=0;--j){
 						for(auto tj=j-1;tj>=0; --tj){
-							if(_board[i][tj]==0)
+							if(board[i][tj]==0)
 								continue;
-							else if(_board[i][j] == _board[i][tj]){
-								++_board[i][j];
-								_board[i][tj] = 0;
+							else if(board[i][j] == board[i][tj]){
+								++board[i][j];
+								board[i][tj] = 0;
 								addTile = true;
 								break;
 							}else{
-								if(_board[i][j] == 0){
-									_board[i][j] = _board[i][tj];
-									_board[i][tj] = 0;
+								if(board[i][j] == 0){
+									board[i][j] = board[i][tj];
+									board[i][tj] = 0;
 									++j;
 									addTile = true;
 								}
@@ -105,17 +113,17 @@ public:
 				for(int j=0;j<m;++j){
 					for(int i=0;i<n;++i){
 						for(auto ti=i+1; ti<n; ++ti){
-							if(_board[ti][j]==0)
+							if(board[ti][j]==0)
 								continue;
-							else if(_board[i][j] == _board[ti][j]){
-								++_board[i][j];
-								_board[ti][j] = 0;
+							else if(board[i][j] == board[ti][j]){
+								++board[i][j];
+								board[ti][j] = 0;
 								addTile = true;
 								break;
 							}else{
-								if(_board[i][j] == 0){
-									_board[i][j] = _board[ti][j];
-									_board[ti][j] = 0;
+								if(board[i][j] == 0){
+									board[i][j] = board[ti][j];
+									board[ti][j] = 0;
 									addTile = true;
 									--i;
 								}
@@ -129,17 +137,17 @@ public:
 				for(int i=0;i<n;++i){
 					for(int j=0;j<m;++j){
 						for(auto tj=j+1; tj<m; ++tj){
-							if(_board[i][tj]==0)
+							if(board[i][tj]==0)
 								continue;
-							else if(_board[i][j] == _board[i][tj]){
-								++_board[i][j];
-								_board[i][tj] = 0;
+							else if(board[i][j] == board[i][tj]){
+								++board[i][j];
+								board[i][tj] = 0;
 								addTile = true;
 								break;
 							}else{
-								if(_board[i][j] == 0){
-									_board[i][j] = _board[i][tj];
-									_board[i][tj] = 0;
+								if(board[i][j] == 0){
+									board[i][j] = board[i][tj];
+									board[i][tj] = 0;
 									addTile = true;
 									--j;
 								}
@@ -153,17 +161,17 @@ public:
 				for(int j=0;j<m;++j){
 					for(int i=n-1;i>=0;--i){
 						for(auto ti=i-1; ti>=0; --ti){
-							if(_board[ti][j]==0)
+							if(board[ti][j]==0)
 								continue;
-							else if(_board[i][j] == _board[ti][j]){
-								++_board[i][j];
-								_board[ti][j] = 0;
+							else if(board[i][j] == board[ti][j]){
+								++board[i][j];
+								board[ti][j] = 0;
 								addTile = true;
 								break;
 							}else{
-								if(_board[i][j] == 0){
-									_board[i][j] = _board[ti][j];
-									_board[ti][j] = 0;
+								if(board[i][j] == 0){
+									board[i][j] = board[ti][j];
+									board[ti][j] = 0;
 									addTile = true;
 									++i;
 								}

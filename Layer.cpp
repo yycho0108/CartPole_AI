@@ -1,4 +1,5 @@
 #include "Layer.h"
+#include "Utility.h"
 
 Layer::Layer(int n):n(n){
 	_I.set_size(n);

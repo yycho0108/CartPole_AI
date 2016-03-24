@@ -2,6 +2,7 @@
 #define __LAYER_H__
 
 #include <armadillo>
+
 using namespace arma;
 
 class Layer{

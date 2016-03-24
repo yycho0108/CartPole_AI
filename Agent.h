@@ -8,20 +8,11 @@ private:
 	Net n;
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
-
 public:
-	Agent(std::vector<int> t):n(t){
-
-	}
-	int getRand(){
-
-	}
-	int getBest(){
-
-	}
-	int getNext(){
-
-	}
+	Agent(std::vector<int> t);
+	int getRand();
+	int getBest();
+	int getNext();
 };
 
 #endif

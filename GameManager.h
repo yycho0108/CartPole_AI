@@ -43,7 +43,7 @@ public:
 		if(who == "kb")
 			close(kbd);
 	}
-	bool read(DIR& dir){
+	bool CMDread(DIR& dir){
 		if(who == "kb")
 			return KBread(dir);
 		else if (who == "ai")
@@ -92,7 +92,7 @@ public:
 	}
 	void run(){
 		DIR dir = X;
-		while(read(dir)){
+		while(CMDread(dir)){
 			if(dir == X){
 				//new episode
 			}else{

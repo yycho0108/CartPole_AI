@@ -1,5 +1,6 @@
 
 #include "Net.h"
+#include "Utility.h"
 #include <iostream>
 
 #include <functional>
@@ -10,22 +11,6 @@
 
 using namespace arma;
 using namespace std;
-
-double sigmoid(double x){
-	return 1.0/(1.0 + exp(-x));
-}
-vec sigmoid(vec& v){
-	return 1.0/(1.0 + exp(-v));
-}
-vec sigmoidPrime(vec& v, bool sig){
-	if(sig)
-		return v % (1.0-v);
-	else{
-		vec s = sigmoid(v);
-		return s % (1.0-s);
-	}
-}
-
 Net::Net(std::vector<int> t):t(t){
 	for(size_t i=1;i<t.size();++i){
 		W.push_back(arma::randn<mat>(t[i],t[i-1]));

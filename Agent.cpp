@@ -1,14 +1,21 @@
 #include "Agent.h"
+#include <random>
+#include <ctime>
+
+auto dist = std::bernoulli_distribution(0.1);
+std::default_random_engine rng(time(0));
 
 Agent::Agent(std::vector<int> t):n(t){
-
+	//needs implementation
 }
-int Agent::getRand(){
-	return 0;
+DIR Agent::getRand(){
+	//needs implementation
+	return X;
 }
-int Agent::getBest(){
-	return 0;
+DIR Agent::getBest(){
+	//needs implementation
+	return X;
 }
-int Agent::getNext(){
-	return 0;
+DIR Agent::getNext(){
+	return dist(rng)? getRand() : getBest();
 }

@@ -2,6 +2,7 @@
 #define __AGENT_H__
 
 #include "Net.h"
+#include "Board.h"
 
 class Agent{
 private:
@@ -10,9 +11,9 @@ private:
 	//output = Q-value
 public:
 	Agent(std::vector<int> t);
-	int getRand();
-	int getBest();
-	int getNext();
+	DIR getRand();
+	DIR getBest();
+	DIR getNext();
 };
 
 #endif

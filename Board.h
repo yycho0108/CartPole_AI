@@ -94,8 +94,8 @@ public:
 									_board[i][tj] = 0;
 									++j;
 									addTile = true;
-									break;
 								}
+								break;
 							}
 						}
 					}
@@ -118,8 +118,8 @@ public:
 									_board[ti][j] = 0;
 									addTile = true;
 									--i;
-									break;
 								}
+								break;
 							}
 						}
 					}
@@ -142,8 +142,8 @@ public:
 									_board[i][tj] = 0;
 									addTile = true;
 									--j;
-									break;
 								}
+								break;
 							}
 						}
 					}
@@ -166,8 +166,8 @@ public:
 									_board[ti][j] = 0;
 									addTile = true;
 									++i;
-									break;
 								}
+								break;
 							}
 						}
 					}

@@ -1,6 +1,7 @@
 #ifndef __GAMEMANGER_H__
 #define __GAMEMANGER_H__
 #include "Board.h"
+#include "Agent.h"
 #include <linux/input.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -15,23 +16,26 @@ enum : char {RELEASED, PRESSED, REPEATED};
 template<int n, int m>
 class GameManager{
 private:
-	int kbd;
+	int kb;
+	Agent ai;
 	input_event ev;
 	Board<n,m> board;
 	std::string who;
 public:
-	GameManager(std::string who):who(who){
+	GameManager(std::string who):who(who),ai(std::vector<int>({n*m,n*m/2,4})){
 		for(auto& c : who){
 			c = std::tolower(c);
 		}
 		if(who == "kb"){
-			kbd = open("/dev/input/by-path/platform-i8042-serio-0-event-kbd",O_RDONLY); //read keyboard
-			if(kbd == -1){
+			kb = open("/dev/input/by-path/platform-i8042-serio-0-event-kbd",O_RDONLY); //read keyboard
+			if(kb == -1){
 				fprintf(stderr,"Cannot open device: %s.\n", strerror(errno));
-				close(kbd);
+				close(kb);
 				throw("CANNOT OPEN DEVICE");
 			}
 		}else if (who == "ai"){
+			std::vector<int> t({n*m,n*m/2,4}); //topology
+			ai = Agent(t);
 			//AI SETUP CODE HERE
 		}
 
@@ -41,7 +45,7 @@ public:
 	}
 	~GameManager(){
 		if(who == "kb")
-			close(kbd);
+			close(kb);
 	}
 	bool CMDread(DIR& dir){
 		if(who == "kb")
@@ -51,7 +55,7 @@ public:
 	}
 	bool KBread(DIR& dir){
 		dir = X;
-		ssize_t bytes = read(kbd,&ev,sizeof(ev));
+		ssize_t bytes = read(kb,&ev,sizeof(ev));
 		
 		if(bytes == (ssize_t)-1){
 			if(errno == EINTR){

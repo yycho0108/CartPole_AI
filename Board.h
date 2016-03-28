@@ -11,7 +11,7 @@
 
 using namespace std;
 using ull = unsigned long long;
-enum DIR: char {X,R,U,L,D};
+enum DIR: char {R,U,L,D,X};//X is considered out-of-bounds
 
 template<int n, int m>
 class Board{
@@ -19,11 +19,15 @@ private:
 	char _board[n][m] = {};
 	ull _repr;
 	bool _update;
+	bool _end;
 public:
 	Board(){
 		srand(time(0));
 		_repr = 0;
 		_update = false;	
+		_end = false;
+		randTile();
+		randTile();
 	};
 	explicit Board(ull _repr):_repr(_repr){
 		srand(time(0));
@@ -51,22 +55,27 @@ public:
 				}
 			}
 			_update = false;
+
 		}
 	}
-	void randTile(){// maybe add params to how many random tiles are desired
+	void randTile(){
+		_end = randTile(_board);
+	}
+	bool randTile(char board[n][m]){// maybe add params to how many random tiles are desired
 		std::vector<int> empty;
 		for(int i=0;i<n;++i){
 			for(int j=0;j<m;++j){
-				if(!_board[i][j]){//empty
+				if(!board[i][j]){//empty
 					empty.push_back(i*m+j);
 				}
 			}
 		}
-		//if empty.size() == 0 then gameOver()
+		if(empty.size() == 0)//my board
+		   	return true;
 		std::random_shuffle(empty.begin(),empty.end());
-		_board[empty.front()/m][empty.front()%m] = (float(rand())/RAND_MAX < 0.1)? 2 : 1;
-
+		board[empty.front()/m][empty.front()%m] = (float(rand())/RAND_MAX < 0.1)? 2 : 1;
 		_update = true;
+		return false;
 		//get empty tiles
 		//
 	}
@@ -75,15 +84,16 @@ public:
 		update(); //whenever a query occurs, update if necessary
 		return _repr;
 	}
-	void ifnext(DIR dir, char board[n][m]){
+	int ifnext(DIR dir, char board[n][m]){
 		memcpy(board,_board,sizeof(board));
-		next(dir, board);
+		return next(dir, board);
 	}
-	void next(DIR dir){
-		next(dir, _board);
+	int next(DIR dir){
+		return next(dir, _board);
 	}
-	void next(DIR dir, char board[n][m]){
+	int next(DIR dir, char board[n][m]){
 		bool addTile = false;
+		int reward = 0;
 		switch(dir){
 			case R:
 				for(int i=0;i<n;++i){
@@ -92,7 +102,7 @@ public:
 							if(board[i][tj]==0)
 								continue;
 							else if(board[i][j] == board[i][tj]){
-								++board[i][j];
+								reward += 1<<(++board[i][j]);
 								board[i][tj] = 0;
 								addTile = true;
 								break;
@@ -116,7 +126,7 @@ public:
 							if(board[ti][j]==0)
 								continue;
 							else if(board[i][j] == board[ti][j]){
-								++board[i][j];
+								reward += 1<<(++board[i][j]);
 								board[ti][j] = 0;
 								addTile = true;
 								break;
@@ -140,7 +150,7 @@ public:
 							if(board[i][tj]==0)
 								continue;
 							else if(board[i][j] == board[i][tj]){
-								++board[i][j];
+								reward += 1<<(++board[i][j]);
 								board[i][tj] = 0;
 								addTile = true;
 								break;
@@ -164,7 +174,7 @@ public:
 							if(board[ti][j]==0)
 								continue;
 							else if(board[i][j] == board[ti][j]){
-								++board[i][j];
+								reward += 1<<(++board[i][j]);
 								board[ti][j] = 0;
 								addTile = true;
 								break;
@@ -192,6 +202,7 @@ public:
 			randTile();
 			_update = true;
 		}
+		return reward;
 	}
 	void print(){
 		cout << "----" << endl;
@@ -202,6 +213,24 @@ public:
 			cout << endl;
 		}
 		cout << "----" << endl;
+	}
+	static std::vector<double> toVec(char board[n][m]){
+		std::vector<double> res((char*)board,(char*)board+n*m);
+		//normalize
+		double mv = *std::max_element(res.begin(),res.end());
+		if(mv != 0){//would probably be true, though.
+			for(auto& e : res){
+				e /= mv;
+			}
+		}
+		//
+		return res; 
+	}
+	std::vector<double> toVec(){
+		return toVec(_board);
+	}
+	bool end(){
+		return _end;
 	}
 };
 

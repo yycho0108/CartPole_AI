@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(){
-	GameManager<4,4> g("kb");
+	GameManager<4,4> g("ai");
 	g.run();
 
 	/*

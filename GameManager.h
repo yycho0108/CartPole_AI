@@ -94,10 +94,12 @@ public:
 		return true;
 	}
 	bool AIread(DIR& dir){
+		//confidence as param...
 		dir = ai.getNext(board);
 		return true;
 	}
 	void run(){
+		char tBoard[n][m];
 		DIR dir = X;
 		while(CMDread(dir)){
 			if(dir == X || board.end()){
@@ -105,7 +107,8 @@ public:
 				//new episode
 			}else{
 				//UPDATE Q-Value
-				int r = board.next(dir); //immediate reward
+				float r = board.next(dir) * 1.52e-5; //immediate reward
+				std::cout << r << std::endl;
 				float mv = ai.getMax(board);//max of "next" state(= this state now)
 				ai.update(dir,r,mv);
 				//not yet implemented

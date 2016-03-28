@@ -5,6 +5,7 @@
 #include <ctime>
 #include "Net.h"
 #include "Board.h"
+#include "Utility.h"
 
 auto split = std::uniform_real_distribution<float>();
 std::default_random_engine rng(time(0));
@@ -12,6 +13,8 @@ std::default_random_engine rng(time(0));
 template<int n, int m>
 class Agent{
 private:
+	float confidence;
+	int age;
 	Net net;
 	std::vector<int> t;
 	std::vector<double> v; //prevState
@@ -19,7 +22,8 @@ private:
 	//output = Q-value
 public:
 	Agent(std::vector<int> t):net(t),t(t){
-		
+		age = 0;
+		confidence = 0.1;	
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(){
@@ -70,23 +74,32 @@ public:
 			maxVal = val>maxVal?val:maxVal;
 			v[s+i] = 0.0;
 		}
+		std::cout << maxVal << std::endl;
 		return maxVal;
 	}
-	DIR getNext(Board<n,m>& board, float confidence=0.5){
+	DIR getNext(Board<n,m>& board){
 		return (split(rng) > confidence)? getRand() : getBest(board);
 	}
 	void update(DIR dir, double r, double qn){
+		//print(v);
 		//r = im. reward
 		//qn = q_next (SARSA or Q-Learning)
-		auto alpha = 0.6;
+		auto alpha = confidence;
 		auto index = v.size()-4+(int)dir;
 		v[index] = 1.0;
 
-		std::vector<double> y = net.FF(v);
-		y[0] = (1.0-alpha)*y[0] + alpha*(r+qn);
+		std::vector<double> y = net.FF(v); //old value
+		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+qn); //new value
+		namedPrint(y[0]);
 		net.BP(y);
+		y = net.FF(v);
+		std::cout << "--> " << std::endl;
+		namedPrint(y[0]);
 
 		v[index] = 0.0;
+
+		++age;
+		confidence = tanh(age * 0.001);
 	}
 };
 

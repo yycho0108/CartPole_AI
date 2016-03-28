@@ -198,6 +198,10 @@ public:
 				//do nothing
 				break;
 		}
+		//setting addTile to be true at all times
+		//Because it is AI.
+		//faulty because it would reset somewhat randomly, but can't really help that...
+		addTile = true;	
 		if(addTile){
 			randTile();
 			_update = true;
@@ -223,7 +227,6 @@ public:
 				e /= mv;
 			}
 		}
-		//
 		return res; 
 	}
 	std::vector<double> toVec(){

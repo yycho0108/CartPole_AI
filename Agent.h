@@ -23,7 +23,7 @@ private:
 public:
 	Agent(std::vector<int> t):net(t),t(t){
 		age = 0;
-		confidence = 0.1;	
+		confidence = 0.2;	
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(){
@@ -74,7 +74,6 @@ public:
 			maxVal = val>maxVal?val:maxVal;
 			v[s+i] = 0.0;
 		}
-		std::cout << maxVal << std::endl;
 		return maxVal;
 	}
 	DIR getNext(Board<n,m>& board){
@@ -90,14 +89,9 @@ public:
 
 		std::vector<double> y = net.FF(v); //old value
 		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+qn); //new value
-		namedPrint(y[0]);
 		net.BP(y);
-		y = net.FF(v);
-		std::cout << "--> " << std::endl;
-		namedPrint(y[0]);
 
 		v[index] = 0.0;
-
 		++age;
 		confidence = tanh(age * 0.001);
 	}

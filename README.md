@@ -5,14 +5,20 @@ Actions:
 - left/right/down/up
 
 States:
-16 numbers (for 4X4 grid)
+n\*m (i.e. 16 for 4X4 grid)
 
 ---
 ## Progress
 
 - [x] Board Complete
 - [x] Game Logic Complete (for verification)
-- [ ] Q-Learning Agent Implementation
+- [x] Q-Learning Agent Implementation -- faulty
+- [ ] Experience Replay
+- [ ] ConvNet (if needed)
+- [ ] SARSA or Off-Policy Q-Learning?
+- [ ] SIGINT Handling
+- [ ] Save/Load Trained Network
+- [ ] Debugging Premature Capping Problem
 
 ---
 ## Notes

@@ -31,3 +31,6 @@ Given that the state space is anticipated to be enormous, it is impractical to u
 
 ---
 ![Running](images/game.png)
+
+Currently, does not seem to be learning:
+![Scores](images/scores.png)

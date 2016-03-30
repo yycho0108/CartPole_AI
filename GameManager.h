@@ -27,6 +27,7 @@ private:
 	std::string who;
 public:
 	GameManager(std::string who):who(who),ai(topology(n,m)){
+		srand(time(0));
 		for(auto& c : who){
 			c = std::tolower(c);
 		}
@@ -99,22 +100,31 @@ public:
 		return true;
 	}
 	void run(){
-		static float maxR = 1024.0;
 		DIR dir = X;
+		int score = 0;
+		int epoch = 0;
+		//got rid of maxR because it casts doubts
 		while(CMDread(dir)){
+			//namedPrint(dir);
 			//UPDATE Q-Value
 			float r = board.next(dir);
-			maxR = maxR>r?maxR:r;
-			r /= maxR; //immediate reward
+			score += r;
+
+			r /= 2048.0; //normalize
 
 			if(board.end()){
+				board.print();
 				//terminal state
 				ai.update(dir,r,-1.0);
 				board = Board<n,m>();
+				namedPrint(epoch);
+				namedPrint(score);
+				score = 0;
+				++epoch;
 			}else{
 				//usual state
 				float mv = ai.getMax(board);//max of "next" state(= this state now)
-				namedPrint(mv);
+				//namedPrint(mv);
 				ai.update(dir,r,mv);
 			}
 		}

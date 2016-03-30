@@ -22,7 +22,6 @@ private:
 	bool _end;
 public:
 	Board(){
-		srand(time(0));
 		_repr = 0;
 		_update = false;	
 		_end = false;
@@ -71,7 +70,7 @@ public:
 			}
 		}
 		if(empty.size() == 0)//my board
-		   	return true;
+		   	return true;// no tile is empty
 		std::random_shuffle(empty.begin(),empty.end());
 		board[empty.front()/m][empty.front()%m] = (float(rand())/RAND_MAX < 0.1)? 2 : 1;
 		_update = true;

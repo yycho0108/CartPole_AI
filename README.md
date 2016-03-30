@@ -19,7 +19,8 @@ n\*m (i.e. 16 for 4X4 grid)
 - [ ] SIGINT Handling
 - [ ] Save/Load Trained Network
 - [x] Debugging Premature Capping Problem
-- [x] Better Determination of Terminal State (without too much overhead, but not missing either)
+- [x] Better Determination of Terminal State
+- [ ] Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration (despite greater overhead)
 
 ---
 ## Notes

@@ -14,7 +14,6 @@ template<int n, int m>
 class Agent{
 private:
 	float confidence;
-	int age;
 	Net net;
 	std::vector<int> t;
 	std::vector<double> v; //prevState
@@ -22,8 +21,7 @@ private:
 	//output = Q-value
 public:
 	Agent(std::vector<int> t):net(t),t(t){
-		age = 0;
-		confidence = 0.1;	
+		confidence = 0.1;
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(Board<n,m>& board){
@@ -87,13 +85,13 @@ public:
 		return maxVal;
 	}
 	DIR getNext(Board<n,m>& board){
-		return (split(rng) > confidence)? getRand(board) : getBest(board);
+		return (split(rng) > 0.9)? getRand(board) : getBest(board);
 	}
-	void update(DIR dir, double r, double qn){
+	void update(DIR dir, double r, double qn,float alpha){
+		confidence = alpha;
 		//print(v);
 		//r = im. reward
 		//qn = q_next (SARSA or Q-Learning)
-		auto alpha = confidence;
 		auto index = v.size()-4+(int)dir;
 		v[index] = 1.0;
 
@@ -103,13 +101,10 @@ public:
 		//namedPrint(r);
 		//namedPrint(qn);
 		//namedPrint(y[0]);
-		//namedPrint(alpha);
 
 		net.BP(y);
 
 		v[index] = 0.0;
-		++age;
-		confidence = tanh(age * 0.001);
 	}
 };
 

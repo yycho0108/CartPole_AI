@@ -104,14 +104,17 @@ public:
 		int score = 0;
 		int epoch = 0;
 		std::vector<int> scores;
+		float maxR=1.0;
 //		std::vector<DIR> dirs;
 
 		//got rid of maxR because it casts doubts
-		while(CMDread(dir) && epoch < 5000){
+		while(CMDread(dir)){
 //			dirs.push_back(dir);
 			//namedPrint(dir);
 			//UPDATE Q-Value
 			float r = board.next(dir);
+			maxR = r>maxR?r:maxR;
+			namedPrint(maxR);
 			score += r;
 
 			r /= 2048.0; //normalize
@@ -120,7 +123,7 @@ public:
 			if(dir==X || board.end()){
 				//board.print();
 				//terminal state
-				ai.update(dir,r,-1.0);
+				ai.update(dir,r,-1.0,0.3);
 				board = Board<n,m>();
 				//namedPrint(epoch);
 				namedPrint(score);
@@ -131,16 +134,16 @@ public:
 				//usual state
 				float mv = ai.getMax(board);//max of "next" state(= this state now)
 				//namedPrint(mv);
-				ai.update(dir,r,mv);
+				ai.update(dir,r,mv,0.3);
 			}
 		}
 
 
-		std::ofstream f_score("scores.csv");
-		for(auto& s : scores){
-			f_score << s << endl;
-		}
-		f_score.close();
+		//std::ofstream f_score("scores.csv");
+		//for(auto& s : scores){
+		//	f_score << s << endl;
+		//}
+		//f_score.close();
 
 //		std::ofstream f_dir("dirs.csv");
 //		for(auto& d : dirs){

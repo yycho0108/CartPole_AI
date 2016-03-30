@@ -23,7 +23,7 @@ private:
 public:
 	Agent(std::vector<int> t):net(t),t(t){
 		age = 0;
-		confidence = 0.2;	
+		confidence = 0.1;	
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(){
@@ -69,10 +69,11 @@ public:
 		//currently editing here
 		float maxVal=0;
 		for(int i=0;i<4;++i){
-			v[s+i] = 1.0; //activate "action"
+			v[s+i] = 1.0; //activate "action" (r/u/l/d)
 			auto val = net.FF(v)[0];
+			//namedPrint(val);
 			maxVal = val>maxVal?val:maxVal;
-			v[s+i] = 0.0;
+			v[s+i] = 0.0; //undo activation
 		}
 		return maxVal;
 	}
@@ -89,6 +90,12 @@ public:
 
 		std::vector<double> y = net.FF(v); //old value
 		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+qn); //new value
+
+		//namedPrint(r);
+		//namedPrint(qn);
+		//namedPrint(y[0]);
+		//namedPrint(alpha);
+
 		net.BP(y);
 
 		v[index] = 0.0;

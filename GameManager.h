@@ -99,26 +99,23 @@ public:
 		return true;
 	}
 	void run(){
-		static float maxR;
-		char tBoard[n][m];
+		static float maxR = 1024.0;
 		DIR dir = X;
 		while(CMDread(dir)){
-			if(dir == X || board.end()){
+			//UPDATE Q-Value
+			float r = board.next(dir);
+			maxR = maxR>r?maxR:r;
+			r /= maxR; //immediate reward
+
+			if(board.end()){
+				//terminal state
+				ai.update(dir,r,-1.0);
 				board = Board<n,m>();
-				//new episode
 			}else{
-				//UPDATE Q-Value
-				float r = board.next(dir);
-				maxR = maxR>r?maxR:r;
-				//namedPrint(maxR);
-				r = board.next(dir)/maxR; //immediate reward
-				//std::cout << r << std::endl;
+				//usual state
 				float mv = ai.getMax(board);//max of "next" state(= this state now)
+				namedPrint(mv);
 				ai.update(dir,r,mv);
-				//not yet implemented
-				
-				//board.print();
-				//cout << endl;
 			}
 		}
 	}

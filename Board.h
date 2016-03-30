@@ -17,50 +17,24 @@ template<int n, int m>
 class Board{
 private:
 	char _board[n][m] = {};
-	ull _repr;
-	bool _update;
+	bool addTile;
 	bool _end;
+
+	char _next[4][n][m] = {};
+	bool _nextDir[4] = {};
+	int _nextR[4] = {}; //next reward
 public:
 	Board(){
-		_repr = 0;
-		_update = false;	
 		_end = false;
-		randTile();
-		randTile();
+		randTile(_board); //put 2 random Tiles
+		randTile(_board);
+		checkAvailable();
 	};
-	explicit Board(ull _repr):_repr(_repr){
-		srand(time(0));
-		static char mask = BOOST_BINARY(1111);
-		_update = false;
-		for(int i=n-1;i>=0;--i){
-			for(int j=m-1;j>=0;--j){
-				_board[i][j] = _repr & mask; //15 = 0b1111 
-				_repr >>=4; //the local _repr, non-member
-				//cout << bitset<4>(_repr & mask) << endl;
-			}
-		}
-	}
-	
+
 	void set(int i, int j, char val){
 		_board[i][j] = val;
-		_update = true;
 	}
-	void update(){
-		if(_update){
-			for(auto& r : _board){
-				for(auto& c : r){
-					_repr <<= 4;
-					_repr += c;
-				}
-			}
-			_update = false;
-
-		}
-	}
-	void randTile(){
-		_end = randTile(_board);
-	}
-	bool randTile(char board[n][m]){// maybe add params to how many random tiles are desired
+	void randTile(char board[n][m]){// maybe add params to how many random tiles are desired
 		std::vector<int> empty;
 		for(int i=0;i<n;++i){
 			for(int j=0;j<m;++j){
@@ -69,30 +43,24 @@ public:
 				}
 			}
 		}
-		if(empty.size() == 0)//my board
-		   	return true;// no tile is empty
 		std::random_shuffle(empty.begin(),empty.end());
 		board[empty.front()/m][empty.front()%m] = (float(rand())/RAND_MAX < 0.1)? 2 : 1;
-		_update = true;
-		return false;
 		//get empty tiles
 		//
 	}
 
-	ull repr(){
-		update(); //whenever a query occurs, update if necessary
-		return _repr;
-	}
 	int ifnext(DIR dir, char board[n][m]){
-		memcpy(board,_board,sizeof(board));
+		memcpy(board,_board,sizeof(_board));
 		return next(dir, board);
 	}
-	int next(DIR dir){
-		return next(dir, _board);
+	int next(DIR dir){ //go to precalculated next state
+		memcpy(_board,_next[dir],sizeof(_board));
+		checkAvailable(); //recalculate next available states
+		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
-		bool addTile = false;
 		int reward = 0;
+		addTile = false;
 		switch(dir){
 			case R:
 				for(int i=0;i<n;++i){
@@ -197,26 +165,27 @@ public:
 				//do nothing
 				break;
 		}
-		//setting addTile to be true at all times
-		//Because it is AI.
-		//faulty because it would reset somewhat randomly, but can't really help that...
-		addTile = true;	
 		if(addTile){
-			randTile();
-			_update = true;
+			//add random tile to empty loc on board
+			randTile(board);
 		}
 		return reward;
 	}
-	void print(){
+
+	void print(char board[n][m]){
 		cout << "----" << endl;
 		for(int i=0;i<n;++i){
 			for(int j=0;j<m;++j){
-				cout << setw(3) << (int)_board[i][j];
+				cout << setw(3) << (int)board[i][j];
 			}
 			cout << endl;
 		}
 		cout << "----" << endl;
 	}
+	void print(){
+		print(_board);
+	}
+
 	static std::vector<double> toVec(char board[n][m]){
 		std::vector<double> res((char*)board,(char*)board+n*m);
 		//normalize
@@ -231,8 +200,46 @@ public:
 	std::vector<double> toVec(){
 		return toVec(_board);
 	}
+	bool isFull(){
+		for(int i=0;i<n;++i){
+			for(int j=0;j<m;++j){
+				if(_board[i][j] == 0)
+					return false;
+			}
+		}
+		return true;
+	}
+
 	bool end(){
 		return _end;
+
+	}
+	void checkAvailable(){ //check fruitful actions
+		_end = true;
+		for(int dir=0;dir<4;++dir){
+			// store next state to _next[dir]
+			// and store reward of that to _nextR[dir]
+			_nextR[dir] = ifnext((DIR)dir,_next[dir]);
+			_nextDir[dir] = addTile; // = fruitful action
+			
+			//check Terminal
+			if(_nextDir[dir])
+				_end = false; //there exists a fruitful action
+		}
+		//std::cout << "SELF :: " << std::endl;
+		//print(_board);
+		//std::cout << "AVAILABLE :: " << std::endl;
+		//for(int dir=0;dir<4;++dir){
+		//	print(_next[dir]);
+		//}
+	}
+	const bool* getAvailable(){
+		//std::cout << "NEXTDIR : ";
+		//for(int i=0;i<4;++i){
+		//	std::cout << _nextDir[i] << ' ';
+		//}
+		//std::cout << std::endl;
+		return _nextDir;
 	}
 };
 

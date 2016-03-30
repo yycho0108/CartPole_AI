@@ -26,19 +26,17 @@ public:
 		confidence = 0.1;	
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
-	DIR getRand(){
-		auto p = split(rng);
-		if(p < 0.25){
-			return R;
-		}else if (p < 0.5){
-			return U;
-		}else if (p < 0.75){
-			return L;
-		}else{
-			return D;
+	DIR getRand(Board<n,m>& board){
+		const bool* available = board.getAvailable();
+
+		std::vector<DIR> av;
+		for(int i=0;i<4;++i){
+			if(available[i])
+				av.push_back((DIR)i);
 		}
-		//should not reach here
-		return X;	
+		auto p = split(rng);
+
+		return av[int(av.size()*p)];
 	}	
 	DIR getBest(Board<n,m>& board){
 		//get best purely based on network feedforward q-value
@@ -48,16 +46,23 @@ public:
 
 		//currently editing here
 		float maxVal=-99999;
-		DIR maxDir=R;
-		for(int i=0;i<4;++i){
-			v[s+i] = 1.0; //activate "action"
-			auto val = net.FF(v)[0];
-			if(val > maxVal){
-				maxVal = val;
-				maxDir = (DIR)i;
+		DIR maxDir=X;
+
+		const bool* available = board.getAvailable();
+		
+		for(int i=0;i<4;++i){ //or among available actions
+			if(available[i]){
+				v[s+i] = 1.0; //activate "action"
+				auto val = net.FF(v)[0];
+				if(val > maxVal){
+					maxVal = val;
+					maxDir = (DIR)i;
+				}
+				v[s+i] = 0.0;
+
 			}
-			v[s+i] = 0.0;
 		}
+
 		return maxDir;
 	}
 	float getMax(Board<n,m>& board){
@@ -68,17 +73,21 @@ public:
 
 		//currently editing here
 		float maxVal=0;
-		for(int i=0;i<4;++i){
-			v[s+i] = 1.0; //activate "action" (r/u/l/d)
-			auto val = net.FF(v)[0];
-			//namedPrint(val);
-			maxVal = val>maxVal?val:maxVal;
-			v[s+i] = 0.0; //undo activation
+
+		const bool* available = board.getAvailable();
+		for(int i=0;i<4;++i){ //or among available actions
+			if(available[i]){
+				v[s+i] = 1.0; //activate "action" (r/u/l/d)
+				auto val = net.FF(v)[0];
+				//namedPrint(val);
+				maxVal = val>maxVal?val:maxVal;
+				v[s+i] = 0.0; //undo activation
+			}
 		}
 		return maxVal;
 	}
 	DIR getNext(Board<n,m>& board){
-		return (split(rng) > confidence)? getRand() : getBest(board);
+		return (split(rng) > confidence)? getRand(board) : getBest(board);
 	}
 	void update(DIR dir, double r, double qn){
 		//print(v);

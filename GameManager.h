@@ -112,7 +112,8 @@ public:
 
 			r /= 2048.0; //normalize
 
-			if(board.end()){
+			//board.print();
+			if(dir==X || board.end()){
 				board.print();
 				//terminal state
 				ai.update(dir,r,-1.0);

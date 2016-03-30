@@ -18,7 +18,8 @@ n\*m (i.e. 16 for 4X4 grid)
 - [ ] SARSA or Off-Policy Q-Learning?
 - [ ] SIGINT Handling
 - [ ] Save/Load Trained Network
-- [ ] Debugging Premature Capping Problem
+- [x] Debugging Premature Capping Problem
+- [x] Better Determination of Terminal State (without too much overhead, but not missing either)
 
 ---
 ## Notes

@@ -27,7 +27,8 @@ Parameters:
 - [ ] Save/Load Trained Network
 - [x] Debugging Premature Capping Problem
 - [x] Better Determination of Terminal State
-- [ ] Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration (despite greater overhead)
+- [x] ~~Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration~~ -- Unnecessary
+- [ ]
 
 ---
 ## Notes

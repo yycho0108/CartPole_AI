@@ -14,7 +14,7 @@
 enum : char {RELEASED, PRESSED, REPEATED};
 
 std::vector<int> topology(int n, int m){
-	return std::vector<int>({n*m+4,n*m/2,n*m/4,1});
+	return std::vector<int>({n*m+4,n*m/2,1});
 }
 
 template<int n, int m>

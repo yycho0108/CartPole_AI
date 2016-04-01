@@ -28,7 +28,7 @@ Parameters:
 - [x] Debugging Premature Capping Problem
 - [x] Better Determination of Terminal State
 - [x] ~~Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration~~ -- Unnecessary
-- [ ]
+- [ ] Debug Neural Network : Back Propagation Doesn't seem to occur effectively.
 
 ---
 ## Notes

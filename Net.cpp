@@ -11,7 +11,7 @@
 
 using namespace arma;
 using namespace std;
-Net::Net(std::vector<int> t, double alpha):t(t),alpha(alpha){
+Net::Net(std::vector<int> t, double alpha,double decay):t(t),alpha(alpha),decay(decay){
 	for(size_t i=1;i<t.size();++i){
 		W.push_back(arma::randn<mat>(t[i],t[i-1]));
 		B.push_back(arma::randn<vec>(t[i]));
@@ -34,8 +34,8 @@ void Net::BP(std::vector<double> Y){
 	}
 	for(size_t i=1;i<t.size();++i){
 		//alpha = learning rate
-		W[i-1] += alpha * L[i].G() * L[i-1].O().t();
-		B[i-1] += alpha * L[i].G();
+		W[i-1] += alpha * (L[i].G() * L[i-1].O().t() - decay*W[i-1]);
+		B[i-1] += alpha * (L[i].G() - decay*B[i-1]);
 	}
 }
 
@@ -49,28 +49,4 @@ void XOR_GEN(std::vector<double>& X, std::vector<double>& Y){
 	X[1] = randNum()>0.5?1:0;
 	Y[0] = int(X[0]) ^ int(X[1]);
 }
-/*
-int main(int argc, char* argv[]){
-	int lim = 1000;
-	if(argc != 1){
-		lim = std::atoi(argv[1]);
-	}
-	std::vector<int> t({2,4,1});
-	Net net(t);
-	std::vector<double> X(2);
-	std::vector<double> Y(1);
 
-	auto start = clock();
-	for(int i=0;i<lim;++i){
-		XOR_GEN(X,Y);
-		net.FF(X);
-		net.BP(Y);
-	}
-	auto end = clock();
-	printf("Took %f seconds", float(end-start)/CLOCKS_PER_SEC);
-	for(int i=0;i<10;++i){
-		XOR_GEN(X,Y);
-		std::cout << X[0] << ',' << X[1] << ':' <<  Y[0] << '|' << net.FF(X)[0] << std::endl;
-	}
-}
-*/

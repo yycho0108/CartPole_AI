@@ -14,11 +14,14 @@ private:
 	std::vector<Layer> L; //layers
 	std::vector<vec> B; //biases
 	double alpha;
+	double decay;
 public:
 	std::vector<double> FF(std::vector<double> X);
 	void BP(std::vector<double> Y);
-	Net(std::vector<int> t, double alpha=0.6);
+	Net(std::vector<int> t, double alpha=0.6, double decay=0.001);
 };
 
+extern double randNum();
+extern void XOR_GEN(std::vector<double>&, std::vector<double>&);
 
 #endif

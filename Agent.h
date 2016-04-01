@@ -18,8 +18,10 @@ private:
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(std::vector<int> t):net(t,0.6){ //learning rate = 0.6
-		gamma = 0.8; //basically, how much will new value be prioritized?
+	Agent(std::vector<int> t)
+		:net(t,0.6,0.001) //learning rate = 0.6, weight decay = 0.001
+	{
+		gamma = 0.8; //basically, how much discount by "time"? 
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(Board<n,m>& board){
@@ -64,17 +66,21 @@ public:
 	float getMax(Board<n,m>& board){
 		//split this function as this serves an entirely new purpose...ish.
 		std::vector<double> v = board.toVec();
+		const bool* available = board.getAvailable();
+		return getMax(v,available);
+	}
+	float getMax(std::vector<double>& v,const bool* available){
 		auto s = v.size();
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
 		float maxVal=0;
 
-		const bool* available = board.getAvailable();
 		for(int i=0;i<4;++i){ //or among available actions
 			if(available[i]){
 				v[s+i] = 1.0; //activate "action" (r/u/l/d)
-				auto val = net.FF(v)[0];
+				//V = (S',A')
+				auto val = net.FF(v)[0]; // Q(S',A')
 				//namedPrint(val);
 				maxVal = val>maxVal?val:maxVal;
 				v[s+i] = 0.0; //undo activation
@@ -87,24 +93,28 @@ public:
 		//0.9 corresponds to "gamma" .. ish.
 		return (split(rng) > 0.8)? getRand(board) : getBest(board);
 	}
+	void recall(){ // replay memory
+
+	}
 	void update(std::vector<double>& SA, double r, double qn,float alpha){
+		//SARSA
 		//State-Action, Reward, Max(next), alpha
 
 		std::vector<double> y = net.FF(SA); //old value
-		//namedPrint(y[0]);
+		namedPrint(y[0]);
 		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+gamma*qn); //new value
-		//std::cout << ":" <<std::endl;
+		std::cout << "<[[" <<std::endl;
 		
 		//namedPrint(r);
 		//namedPrint(qn);
 		
-		//namedPrint(y[0]);
+		namedPrint(y[0]);
 
 		net.BP(y);
 
-		//y = net.FF(SA);
-		//std::cout << " --> " <<std::endl;
-		//namedPrint(y[0]);
+		y = net.FF(SA);
+		std::cout << " --> " <<std::endl;
+		namedPrint(y[0]);
 	}
 };
 

@@ -14,7 +14,7 @@
 enum : char {RELEASED, PRESSED, REPEATED};
 
 std::vector<int> topology(int n, int m){
-	return std::vector<int>({n*m+4,n*m/2,1});
+	return std::vector<int>({n*m+4,n*m/2,n*m/4,1});
 }
 
 template<int n, int m>
@@ -127,21 +127,27 @@ public:
 			score += r;
 
 			//r /= 1024.0; //normalize
-			r /= 256.0; //normalize
+			r /= 2048.0; //normalize
 
 			//board.print();
 			if(dir==X || board.end()){
-				board.print();
-				//terminal state
-				ai.update(SA,r,-1.0,alpha);
-				board = Board<n,m>();
-				//namedPrint(epoch);
+
 				namedPrint(epoch);
 				namedPrint(score);
-				scores.push_back(score);
-				score = 0;
 				++epoch;
+
+				board.print();
+				//terminal state
 				alpha = tanh(epoch / max_epoch);
+				ai.update(SA,r,-1.0,alpha);
+
+				//const char* b = board.board();
+				//score = *std::max_element(b,b+n*m);
+				scores.push_back(score);
+
+				board = Board<n,m>();
+				score = 0;
+				//namedPrint(epoch);
 			}else{
 				//usual state
 				float mv = ai.getMax(board);//max of this state given optimal policy

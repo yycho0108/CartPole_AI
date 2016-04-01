@@ -55,7 +55,7 @@ public:
 	}
 	int next(DIR dir){ //go to precalculated next state
 		memcpy(_board,_next[dir],sizeof(_board));
-		checkAvailable(); //recalculate next available states
+		checkAvailable(); //calculate next available states
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
@@ -240,6 +240,9 @@ public:
 		//}
 		//std::cout << std::endl;
 		return _nextDir;
+	}
+	const char* board(){
+		return (const char*) _board;
 	}
 };
 

@@ -11,7 +11,9 @@ Parameters:
 - Learning Rate for Network
 - Learning Rate for SARSA (alpha)
 - Discount Rate (gamma)
-
+- Network Topology (# of Neurons and Hidden Layers)
+- max # of epoch
+- Frequency of Random Selection (epsilon)
 ---
 ## Progress
 

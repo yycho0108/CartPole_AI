@@ -19,7 +19,7 @@ private:
 	//output = Q-value
 public:
 	Agent(std::vector<int> t):net(t,0.6){ //learning rate = 0.6
-		gamma = 0.8;
+		gamma = 0.8; //basically, how much will new value be prioritized?
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(Board<n,m>& board){

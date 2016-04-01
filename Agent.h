@@ -13,15 +13,13 @@ std::default_random_engine rng(time(0));
 template<int n, int m>
 class Agent{
 private:
-	float confidence;
+	float gamma; // gamma = 1 - confidence
 	Net net;
-	std::vector<int> t;
-	std::vector<double> v; //prevState
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(std::vector<int> t):net(t),t(t){
-		confidence = 0.1;
+	Agent(std::vector<int> t):net(t,0.6){ //learning rate = 0.6
+		gamma = 0.8;
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(Board<n,m>& board){
@@ -38,7 +36,7 @@ public:
 	}	
 	DIR getBest(Board<n,m>& board){
 		//get best purely based on network feedforward q-value
-		v= board.toVec();
+		std::vector<double> v= board.toVec();
 		auto s = v.size();
 		v.resize(s+4);//for 4 DIRs(RULD)
 
@@ -65,7 +63,7 @@ public:
 	}
 	float getMax(Board<n,m>& board){
 		//split this function as this serves an entirely new purpose...ish.
-		v= board.toVec();
+		std::vector<double> v = board.toVec();
 		auto s = v.size();
 		v.resize(s+4);//for 4 DIRs(RULD)
 
@@ -85,26 +83,28 @@ public:
 		return maxVal;
 	}
 	DIR getNext(Board<n,m>& board){
-		return (split(rng) > 0.9)? getRand(board) : getBest(board);
+		//occasional random exploration
+		//0.9 corresponds to "gamma" .. ish.
+		return (split(rng) > 0.8)? getRand(board) : getBest(board);
 	}
-	void update(DIR dir, double r, double qn,float alpha){
-		confidence = alpha;
-		//print(v);
-		//r = im. reward
-		//qn = q_next (SARSA or Q-Learning)
-		auto index = v.size()-4+(int)dir;
-		v[index] = 1.0;
+	void update(std::vector<double>& SA, double r, double qn,float alpha){
+		//State-Action, Reward, Max(next), alpha
 
-		std::vector<double> y = net.FF(v); //old value
-		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+qn); //new value
-
+		std::vector<double> y = net.FF(SA); //old value
+		//namedPrint(y[0]);
+		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+gamma*qn); //new value
+		//std::cout << ":" <<std::endl;
+		
 		//namedPrint(r);
 		//namedPrint(qn);
+		
 		//namedPrint(y[0]);
 
 		net.BP(y);
 
-		v[index] = 0.0;
+		//y = net.FF(SA);
+		//std::cout << " --> " <<std::endl;
+		//namedPrint(y[0]);
 	}
 };
 

@@ -99,51 +99,66 @@ public:
 		dir = ai.getNext(board);
 		return true;
 	}
-	void run(){
+	void run(int max_epoch = 500){
 		DIR dir = X;
 		int score = 0;
 		int epoch = 0;
+		float alpha = 0.1; //= confidence
 		std::vector<int> scores;
 		float maxR=1.0;
-//		std::vector<DIR> dirs;
 
 		//got rid of maxR because it casts doubts
-		while(CMDread(dir)){
-//			dirs.push_back(dir);
-			//namedPrint(dir);
+		while(CMDread(dir) && epoch < max_epoch){ //select action
+
 			//UPDATE Q-Value
+			std::vector<double> SA = board.toVec();//"previous state"
+			auto s = SA.size();
+			
+			SA.resize(s+4);
+			SA[s+(int)dir]=1.0; //action
+			
+			//namedPrint(SA);
+
 			float r = board.next(dir);
+			//carry out action, observe reward, new state
+
 			maxR = r>maxR?r:maxR;
-			namedPrint(maxR);
+			//namedPrint(maxR);
 			score += r;
 
-			r /= 2048.0; //normalize
+			//r /= 1024.0; //normalize
+			r /= 256.0; //normalize
 
 			//board.print();
 			if(dir==X || board.end()){
-				//board.print();
+				board.print();
 				//terminal state
-				ai.update(dir,r,-1.0,0.3);
+				ai.update(SA,r,-1.0,alpha);
 				board = Board<n,m>();
 				//namedPrint(epoch);
+				namedPrint(epoch);
 				namedPrint(score);
 				scores.push_back(score);
 				score = 0;
 				++epoch;
+				alpha = tanh(epoch / max_epoch);
 			}else{
 				//usual state
-				float mv = ai.getMax(board);//max of "next" state(= this state now)
-				//namedPrint(mv);
-				ai.update(dir,r,mv,0.3);
+				float mv = ai.getMax(board);//max of this state given optimal policy
+				// v = previous state
+				// mv = max of this state given optimal policy
+				// r = reward of reaching this state
+				ai.update(SA,r,mv,alpha);
+				//state, action, reward, maxQ(next), gamma
 			}
 		}
 
 
-		//std::ofstream f_score("scores.csv");
-		//for(auto& s : scores){
-		//	f_score << s << endl;
-		//}
-		//f_score.close();
+		std::ofstream f_score("scores.csv");
+		for(auto& s : scores){
+			f_score << s << endl;
+		}
+		f_score.close();
 
 //		std::ofstream f_dir("dirs.csv");
 //		for(auto& d : dirs){

@@ -10,13 +10,15 @@ vec sigmoid(vec&);
 vec sigmoidPrime(vec&,bool);
 
 template<typename T>
-void print(std::vector<T> v){
+std::ostream& operator<<(std::ostream& o, std::vector<T> v){
+	o << '[';
 	for(auto& e : v){
-		std::cout << e << ", ";
+		o << e << ", ";
 	}
-	std::cout << std::endl;
+	o << ']';
+	o << std::endl;
 }
 
 #define namedPrint(x) \
-	std::cout << #x << " : " << x << endl;
+	std::cout << #x << " : " << x << std::endl;
 #endif

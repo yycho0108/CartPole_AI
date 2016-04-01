@@ -13,10 +13,11 @@ private:
 	std::vector<mat> W;
 	std::vector<Layer> L; //layers
 	std::vector<vec> B; //biases
+	double alpha;
 public:
 	std::vector<double> FF(std::vector<double> X);
 	void BP(std::vector<double> Y);
-	Net(std::vector<int> t);
+	Net(std::vector<int> t, double alpha=0.6);
 };
 
 

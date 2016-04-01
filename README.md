@@ -7,6 +7,11 @@ Actions:
 States:
 n\*m (i.e. 16 for 4X4 grid)
 
+Parameters:
+- Learning Rate for Network
+- Learning Rate for SARSA (alpha)
+- Discount Rate (gamma)
+
 ---
 ## Progress
 
@@ -15,7 +20,7 @@ n\*m (i.e. 16 for 4X4 grid)
 - [x] Q-Learning Agent Implementation -- faulty
 - [ ] Experience Replay
 - [ ] ConvNet (if needed)
-- [ ] SARSA or Off-Policy Q-Learning?
+- [x] SARSA or Off-Policy Q-Learning? -- SARSA
 - [ ] SIGINT Handling
 - [ ] Save/Load Trained Network
 - [x] Debugging Premature Capping Problem

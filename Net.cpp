@@ -11,7 +11,7 @@
 
 using namespace arma;
 using namespace std;
-Net::Net(std::vector<int> t):t(t){
+Net::Net(std::vector<int> t, double alpha):t(t),alpha(alpha){
 	for(size_t i=1;i<t.size();++i){
 		W.push_back(arma::randn<mat>(t[i],t[i-1]));
 		B.push_back(arma::randn<vec>(t[i]));
@@ -33,8 +33,9 @@ void Net::BP(std::vector<double> Y){
 		L[i].G() = W[i].t() * L[i+1].G() % sigmoidPrime(L[i].O(),true);
 	}
 	for(size_t i=1;i<t.size();++i){
-		W[i-1] += 0.6 * L[i].G() * L[i-1].O().t();
-		B[i-1] += 0.6 * L[i].G();
+		//alpha = learning rate
+		W[i-1] += alpha * L[i].G() * L[i-1].O().t();
+		B[i-1] += alpha * L[i].G();
 	}
 }
 

@@ -29,6 +29,9 @@ Parameters:
 - [x] Better Determination of Terminal State
 - [x] ~~Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration~~ -- Unnecessary
 - [ ] Debug Neural Network : Back Propagation Doesn't seem to occur effectively.
+- [ ] Fix Game Logic Bug : Jumping Across Blocks
+
+![Bug](images/game_logic_bug.png)
 
 ---
 ## Notes
@@ -43,3 +46,5 @@ Given that the state space is anticipated to be enormous, it is impractical to u
 
 Currently, does not seem to be learning:
 ![Scores](images/scores.png)
+
+

@@ -38,12 +38,13 @@ private:
 	double gamma; // gamma = 1 - confidence
 	Net<n*m+4, n*m/2, 1> net; //subject to change
 	std::deque<A_Memory> memories;
-	int mSize;
+	int mSize; //memory size
+	int rSize; //recall size = # samples to recall
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
 	Agent(int mSize=1) //size of memory
-		:net(0.6,0.001) ,mSize(mSize) //learning rate = 0.6, weight decay = 0.001
+		:net(0.6,0.001),mSize(mSize),rSize(1>mSize/3?1:mSize/3) //learning rate = 0.6, weight decay = 0.001
 	{
 		gamma = 0.8; //basically, how much discount by "time"? 
 	}
@@ -98,7 +99,7 @@ public:
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		double maxVal=-1;
+		double maxVal=0;
 
 		for(int i=0;i<4;++i){ //or among available actions
 			if(available[i]){
@@ -129,7 +130,6 @@ public:
 
 		auto qn = getMax(s_n,a_n);
 		std::vector<double> y = net.FF(SA); //old value
-		namedPrint(y[0]);
 		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+gamma*qn); //new value
 
 		//std::cout << "<[[" <<std::endl;
@@ -147,8 +147,7 @@ public:
 		static std::mt19937 eng(rd());
 		static std::uniform_int_distribution<int> distr(0,mSize);
 
-		for(int i=0;i<mSize;++i){ //replace mSize with number of samples to recall
-
+		for(int i=0;i<rSize;++i){
 			//potentially replace with distinct random numbers
 			learn(memories[distr(eng)], alpha);
 		}

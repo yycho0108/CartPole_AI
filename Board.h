@@ -177,14 +177,12 @@ public:
 	}
 
 	void print(char board[n][m]){
-		cout << "----" << endl;
 		for(int i=0;i<n;++i){
 			for(int j=0;j<m;++j){
 				cout << setw(3) << (int)board[i][j];
 			}
 			cout << endl;
 		}
-		cout << "----" << endl;
 	}
 	void print(){
 		print(_board);

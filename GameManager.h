@@ -13,6 +13,10 @@
 
 enum : char {RELEASED, PRESSED, REPEATED};
 
+void hline(){
+	cout << "-------------------------" << endl;
+}
+
 template<int n, int m>
 class GameManager{
 private:
@@ -128,14 +132,16 @@ public:
 			//board.print();
 			if(dir==X || board.end()){
 
+				hline();
+				board.print();
 				namedPrint(epoch);
 				namedPrint(score);
-				++epoch;
+				hline();
 
-				board.print();
+				++epoch;
 				//terminal state
 				alpha = tanh(epoch / max_epoch);
-				ai.update(SA,r,board,alpha);
+				ai.update(SA,-1,board,alpha);//-1 for terminal state
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);

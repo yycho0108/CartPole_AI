@@ -20,7 +20,7 @@ Parameters:
 - [x] Board Complete
 - [x] Game Logic Complete (for verification)
 - [x] Q-Learning Agent Implementation -- faulty
-- [ ] Experience Replay
+- [x] Experience Replay
 - [ ] ConvNet (if needed)
 - [x] SARSA or Off-Policy Q-Learning? -- SARSA
 - [ ] SIGINT Handling
@@ -30,7 +30,7 @@ Parameters:
 - [x] ~~Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration~~ -- Unnecessary
 - [x] Debug Neural Network : Back Propagation Doesn't seem to occur effectively.
 	- Neural Network seems to be doing fine, simply a numerical instability for small numbers.
-- ~~[ ] Fix Game Logic Bug : Jumping Across Blocks~~
+- ~~[x] Fix Game Logic Bug : Jumping Across Blocks~~
 	- Was Running Old Code
 - [x] Converting vectors into templates (since they are fixed-size)
 
@@ -45,7 +45,7 @@ Given that the state space is anticipated to be enormous, it is impractical to u
 ---
 ![Running](images/game.png)
 
-Currently, does not seem to be learning:
-![Scores](images/scores.png)
+Currently, does not seem to be learning;
+Scores over time on 3x3 Grid with 50000 iterations:
 
-
+![Scores](images/3x3_50000.png)

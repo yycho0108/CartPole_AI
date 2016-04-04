@@ -44,7 +44,8 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1) //size of memory
-		:net(0.6,0.001),mSize(mSize),rSize(1>mSize/3?1:mSize/3) //learning rate = 0.6, weight decay = 0.001
+		:net(0.3,0.001),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		//learning rate = 0.6, weight decay = 0.001
 	{
 		gamma = 0.8; //basically, how much discount by "time"? 
 	}
@@ -77,6 +78,7 @@ public:
 			if(available[i]){
 				v[s+i] = 1.0; //activate "action"
 				auto val = net.FF(v)[0];
+				//namedPrint(val);
 				if(val > maxVal){
 					maxVal = val;
 					maxDir = (DIR)i;
@@ -120,7 +122,8 @@ public:
 	DIR getNext(A_Board& board){
 		//occasional random exploration
 		//0.9 corresponds to "gamma" .. ish.
-		return (split(rng) > 0.8)? getRand(board) : getBest(board);
+		//e-greedy
+		return (split(rng) < 0.05)? getRand(board) : getBest(board);
 	}
 	void learn(A_Memory& memory, double alpha){
 		std::vector<double> SA(memory.sa,memory.sa+n*m+4);

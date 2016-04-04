@@ -1,13 +1,13 @@
 #2048 AI
 ---
 ## Description
-Actions:
+**Actions:**
 - left/right/down/up
 
-States:
+**States:**
 n\*m (i.e. 16 for 4X4 grid)
 
-Parameters:
+**Parameters:**
 - Network:
 	- Topology(#layers,neurons), @ Agent.h
 	- Learning Rate, @ Agent.h
@@ -26,6 +26,7 @@ Parameters:
 	- Terminal State: @ GameManager.h
 		- -1
 		- 0
+
 ## Progress
 
 - [x] Board Complete

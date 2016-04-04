@@ -8,13 +8,24 @@ States:
 n\*m (i.e. 16 for 4X4 grid)
 
 Parameters:
-- Learning Rate for Network
-- Learning Rate for SARSA (alpha)
-- Discount Rate (gamma)
-- Network Topology (# of Neurons and Hidden Layers)
-- max # of epoch
-- Frequency of Random Selection (epsilon)
----
+- Network:
+	- Topology(#layers,neurons), @ Agent.h
+	- Learning Rate, @ Agent.h
+	- Weight Decay, @ Agent.h
+- SARSA:
+	- Learning Rate(alpha), @ GameManager.h
+	- Discount Rate for future rewards(gamma) @ GameManager.h
+	- Random Selection Rate(epsilon) @ Agent.h
+- #Epoch
+	- Command Line
+- Normalizing reward
+	- Normalization: @ GameManager.h
+		- r /= 2048.0
+		- r /= maxR
+		- r = 1 - 1/r
+	- Terminal State: @ GameManager.h
+		- -1
+		- 0
 ## Progress
 
 - [x] Board Complete
@@ -46,6 +57,7 @@ Given that the state space is anticipated to be enormous, it is impractical to u
 ![Running](images/game.png)
 
 Currently, does not seem to be learning;
+
 Scores over time on 3x3 Grid with 50000 iterations:
 
 ![Scores](images/3x3_50000.png)

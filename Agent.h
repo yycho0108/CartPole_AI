@@ -35,19 +35,19 @@ class Agent{
 	using A_Memory = Memory<n*m>;
 	using A_Board = Board<n,m>;
 private:
+	Net<n*m+4, n*m/2, n*m/2, 1> net; //subject to change
 	double gamma; // gamma = 1 - confidence
-	Net<n*m+4, n*m/2, 1> net; //subject to change
+	double epsilon;
 	std::deque<A_Memory> memories;
 	int mSize; //memory size
 	int rSize; //recall size = # samples to recall
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(int mSize=1) //size of memory
-		:net(0.3,0.001),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+	Agent(int mSize=1, double gamma=0.8, double epsilon=0.05) //size of memory
+		:net(0.3,0.001),gamma(gamma),epsilon(epsilon),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.6, weight decay = 0.001
 	{
-		gamma = 0.8; //basically, how much discount by "time"? 
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(A_Board& board){
@@ -74,8 +74,8 @@ public:
 
 		const bool* available = board.getAvailable();
 		
-		for(int i=0;i<4;++i){ //or among available actions
-			if(available[i]){
+		for(int i=0;i<4;++i){ 
+			if(available[i]){ //among available actions
 				v[s+i] = 1.0; //activate "action"
 				auto val = net.FF(v)[0];
 				//namedPrint(val);
@@ -101,7 +101,7 @@ public:
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		double maxVal=0;
+		double maxVal=-1.0;
 
 		for(int i=0;i<4;++i){ //or among available actions
 			if(available[i]){
@@ -113,6 +113,7 @@ public:
 				v[s+i] = 0.0; //undo activation
 			}
 		}
+		namedPrint(maxVal);
 		return maxVal;
 	}
 	double getMax(const double* state, const bool* available){
@@ -123,7 +124,7 @@ public:
 		//occasional random exploration
 		//0.9 corresponds to "gamma" .. ish.
 		//e-greedy
-		return (split(rng) < 0.05)? getRand(board) : getBest(board);
+		return (split(rng) < epsilon)? getRand(board) : getBest(board);
 	}
 	void learn(A_Memory& memory, double alpha){
 		std::vector<double> SA(memory.sa,memory.sa+n*m+4);

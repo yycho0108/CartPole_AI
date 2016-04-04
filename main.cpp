@@ -13,8 +13,7 @@ using namespace std;
 //	if(argc != 1){
 //		lim = std::atoi(argv[1]);
 //	}
-//	std::vector<int> t({2,4,1});
-//	Net net(t,0.6,0.001); //for learning rate & decay use default
+//	Net net<2,4,1>(0.6,0.001); //for learning rate & decay use default
 //	std::vector<double> X(2);
 //	std::vector<double> Y(1);
 //
@@ -38,6 +37,7 @@ int main(int argc, char* argv[]){
 	if(argc != 1){
 		max_epoch = std::atoi(argv[1]);
 	}
-	GameManager<3,3> g("ai");
-	g.run(max_epoch);
+	GameManager<4,4> g("ai",max_epoch);
+	g.run();
 }
+

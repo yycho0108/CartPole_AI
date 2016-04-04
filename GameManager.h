@@ -25,8 +25,12 @@ private:
 	input_event ev;
 	Board<n,m> board;
 	std::string who;
+
+	int epoch;
+	int max_epoch;
 public:
-	GameManager(std::string who):who(who),ai(10){//mSize = 1
+	GameManager(std::string who, int max_epoch)
+		:who(who),ai(10,0.8,0.05),max_epoch(max_epoch){//mSize = 1, gamma=0.8, epsilon=0.05
 		srand(time(0));
 		for(auto& c : who){
 			c = std::tolower(c);
@@ -96,19 +100,29 @@ public:
 	}
 	bool AIread(DIR& dir){
 		//confidence as param...
-		dir = ai.getNext(board);
+		
+		if (epoch < 0.2*max_epoch) //arbitrary value, 0.2
+			dir = ai.getRand(board);
+		else
+			dir = ai.getNext(board);
 		return true;
 	}
-	void run(int max_epoch = 500){
+	void run(){
+
+		std::vector<DIR> dirs;
+
 		DIR dir = X;
 		int score = 0;
-		int epoch = 0;
+
+		epoch = 0;
+
 		double alpha = 0.1; //= confidence
 		std::vector<int> scores;
 		double maxR=1.0;
 
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action
+			dirs.push_back(dir);
 
 			//UPDATE Q-Value
 			std::vector<double> SA = board.vec();//"previous state"
@@ -127,7 +141,9 @@ public:
 			score += r;
 
 			//r /= 1024.0; //normalize
-			r /= maxR;//2048.0; //normalize
+			//r /= maxR;//2048.0; //normalize
+			if(r != 0)
+				r = 1 - 1/r; //bigger the r, closer to 1
 
 			//board.print();
 			if(dir==X || board.end()){
@@ -140,8 +156,9 @@ public:
 
 				++epoch;
 				//terminal state
-				alpha = tanh(epoch / max_epoch);
-				ai.update(SA,-1,board,alpha);//-1 for terminal state
+				alpha = 0.6; //tanh(epoch / max_epoch);
+
+				ai.update(SA,0,board,alpha);//-1 for terminal state?
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -168,11 +185,11 @@ public:
 		}
 		f_score.close();
 
-//		std::ofstream f_dir("dirs.csv");
-//		for(auto& d : dirs){
-//			f_dir << (int)d << endl;
-//		}
-//		f_dir.close();
+		std::ofstream f_dir("dirs.csv");
+		for(auto& d : dirs){
+			f_dir << (int)d << endl;
+		}
+		f_dir.close();
 	}
 };
 #endif

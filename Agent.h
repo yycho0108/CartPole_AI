@@ -3,12 +3,12 @@
 
 #include <random>
 #include <ctime>
-#include <list>
+#include <deque>
 #include "Net.h"
 #include "Board.h"
 #include "Utility.h"
 
-auto split = std::uniform_real_distribution<float>();
+auto split = std::uniform_real_distribution<double>();
 std::default_random_engine rng(time(0));
 
 template<int n>// n = state size
@@ -35,9 +35,9 @@ class Agent{
 	using A_Memory = Memory<n*m>;
 	using A_Board = Board<n,m>;
 private:
-	float gamma; // gamma = 1 - confidence
-	Net<n*m+4, n*m/2, 1> net;
-	std::list<A_Memory> memories;
+	double gamma; // gamma = 1 - confidence
+	Net<n*m+4, n*m/2, 1> net; //subject to change
+	std::deque<A_Memory> memories;
 	int mSize;
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
@@ -51,14 +51,14 @@ public:
 	DIR getRand(A_Board& board){
 		const bool* available = board.getAvailable();
 
-		std::vector<DIR> av;
+		std::vector<DIR> av; //list of available actions
 		for(int i=0;i<4;++i){
 			if(available[i])
 				av.push_back((DIR)i);
 		}
 		auto p = split(rng);
 
-		return av[int(av.size()*p)];
+		return av[int(av.size()*p)];// if av.size()==3 then ranges from 0~2.9999, end-exclusive
 	}	
 	DIR getBest(A_Board& board){
 		//get best purely based on network feedforward q-value
@@ -67,7 +67,7 @@ public:
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		float maxVal=-99999;
+		double maxVal=-99999;
 		DIR maxDir=X;
 
 		const bool* available = board.getAvailable();
@@ -87,18 +87,18 @@ public:
 
 		return maxDir;
 	}
-	float getMax(A_Board& board){
+	double getMax(A_Board& board){
 		//split this function as this serves an entirely new purpose...ish.
 		std::vector<double> v = board.vec();
 		const bool* available = board.getAvailable();
 		return getMax(v,available);
 	}
-	float getMax(std::vector<double>& v,const bool* available){
+	double getMax(std::vector<double>& v,const bool* available){
 		auto s = v.size();
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		float maxVal=-1;
+		double maxVal=-1;
 
 		for(int i=0;i<4;++i){ //or among available actions
 			if(available[i]){
@@ -112,7 +112,7 @@ public:
 		}
 		return maxVal;
 	}
-	float getMax(const double* state, const bool* available){
+	double getMax(const double* state, const bool* available){
 		std::vector<double> v(state,state+n*m);
 		return getMax(v,available);
 	}
@@ -121,7 +121,7 @@ public:
 		//0.9 corresponds to "gamma" .. ish.
 		return (split(rng) > 0.8)? getRand(board) : getBest(board);
 	}
-	void learn(A_Memory& memory, float alpha){
+	void learn(A_Memory& memory, double alpha){
 		std::vector<double> SA(memory.sa,memory.sa+n*m+4);
 		const double r = memory.r;
 		const double* s_n = memory.s_n;
@@ -142,15 +142,29 @@ public:
 		net.BP(y);
 
 	}
-	void update(std::vector<double>& SA, double r,A_Board& next,float alpha){
+	void learn_batch(double alpha){
+		static std::random_device rd;
+		static std::mt19937 eng(rd());
+		static std::uniform_int_distribution<int> distr(0,mSize);
+
+		for(int i=0;i<mSize;++i){ //replace mSize with number of samples to recall
+
+			//potentially replace with distinct random numbers
+			learn(memories[distr(eng)], alpha);
+		}
+	}
+	void update(std::vector<double>& SA, double r,A_Board& next,double alpha){
 		//SARSA
 		//State-Action, Reward, Max(next), alpha
 		memories.emplace_back(SA,r,next.vec(),next.getAvailable());
+
 		if(memories.size() > mSize)
 			memories.pop_front();
 
-		//batch learn
-		learn(memories.back(), alpha);
+		if(mSize == memories.size())
+			learn_batch(alpha);
+		else
+			learn(memories.back(), alpha);
 	}
 };
 

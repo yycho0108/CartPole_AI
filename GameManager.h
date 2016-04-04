@@ -99,9 +99,9 @@ public:
 		DIR dir = X;
 		int score = 0;
 		int epoch = 0;
-		float alpha = 0.1; //= confidence
+		double alpha = 0.1; //= confidence
 		std::vector<int> scores;
-		float maxR=1.0;
+		double maxR=1.0;
 
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action
@@ -115,7 +115,7 @@ public:
 			
 			//namedPrint(SA);
 
-			float r = board.next(dir);
+			double r = board.next(dir);
 			//carry out action, observe reward, new state
 
 			maxR = r>maxR?r:maxR;
@@ -146,7 +146,7 @@ public:
 				//namedPrint(epoch);
 			}else{
 				//usual state
-				//float mv = ai.getMax(board);//max of this state given optimal policy
+				// board = current state
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state

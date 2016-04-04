@@ -111,7 +111,7 @@ public:
 		while(CMDread(dir) && epoch < max_epoch){ //select action
 
 			//UPDATE Q-Value
-			std::vector<double> SA = board.toVec();//"previous state"
+			std::vector<double> SA = board.vec();//"previous state"
 			auto s = SA.size();
 			
 			SA.resize(s+4);
@@ -127,7 +127,7 @@ public:
 			score += r;
 
 			//r /= 1024.0; //normalize
-			r /= 2048.0; //normalize
+			r /= maxR;//2048.0; //normalize
 
 			//board.print();
 			if(dir==X || board.end()){
@@ -139,7 +139,7 @@ public:
 				board.print();
 				//terminal state
 				alpha = tanh(epoch / max_epoch);
-				ai.update(SA,r,-1.0,alpha);
+				ai.update(SA,r,board,alpha);
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -150,11 +150,11 @@ public:
 				//namedPrint(epoch);
 			}else{
 				//usual state
-				float mv = ai.getMax(board);//max of this state given optimal policy
+				//float mv = ai.getMax(board);//max of this state given optimal policy
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state
-				ai.update(SA,r,mv,alpha);
+				ai.update(SA,r,board,alpha);
 				//state, action, reward, maxQ(next), gamma
 			}
 		}

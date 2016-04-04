@@ -28,8 +28,11 @@ Parameters:
 - [x] Debugging Premature Capping Problem
 - [x] Better Determination of Terminal State
 - [x] ~~Replace Deterministic Max Q-Value Exploration with Probabilistic Exploration~~ -- Unnecessary
-- [ ] Debug Neural Network : Back Propagation Doesn't seem to occur effectively.
-- ~~[ ] Fix Game Logic Bug : Jumping Across Blocks~~ Was Running Old Code
+- [x] Debug Neural Network : Back Propagation Doesn't seem to occur effectively.
+	- Neural Network seems to be doing fine, simply a numerical instability for small numbers.
+- ~~[ ] Fix Game Logic Bug : Jumping Across Blocks~~
+	- Was Running Old Code
+- [ ] Converting vectors into templates (since they are fixed-size)
 
 ---
 ## Notes

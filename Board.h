@@ -23,12 +23,15 @@ private:
 	char _next[4][n][m] = {};
 	bool _nextDir[4] = {};
 	int _nextR[4] = {}; //next reward
+
+	std::vector<double> v;
 public:
 	Board(){
 		_end = false;
 		randTile(_board); //put 2 random Tiles
 		randTile(_board);
 		checkAvailable();
+		v = toVec(_board);
 	};
 
 	void set(int i, int j, char val){
@@ -56,6 +59,7 @@ public:
 	int next(DIR dir){ //go to precalculated next state
 		memcpy(_board,_next[dir],sizeof(_board));
 		checkAvailable(); //calculate next available states
+		v = toVec(_board);
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
@@ -197,8 +201,8 @@ public:
 		}
 		return res; 
 	}
-	std::vector<double> toVec(){
-		return toVec(_board);
+	std::vector<double>& vec(){
+		return v;
 	}
 	bool isFull(){
 		for(int i=0;i<n;++i){

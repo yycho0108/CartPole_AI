@@ -12,6 +12,11 @@
 using namespace std;
 using ull = unsigned long long;
 enum DIR: char {R,U,L,D,X};//X is considered out-of-bounds
+char dirName[5] = {'R','U','L','D','X'};
+
+std::ostream& operator<<(std::ostream& os, DIR x){
+	return os << dirName[(int)x];
+}
 
 template<int n, int m>
 class Board{

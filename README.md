@@ -33,7 +33,7 @@ Parameters:
 - [x] Q-Learning Agent Implementation -- faulty
 - [x] Experience Replay
 - [ ] ConvNet (if needed)
-- [x] SARSA or Off-Policy Q-Learning? -- SARSA
+- [x] SARSA or Off-Policy Q-Learning? --> Hybrid(Initially random-exploration, going off to SARSA)
 - [ ] SIGINT Handling
 - [ ] Save/Load Trained Network
 - [x] Debugging Premature Capping Problem
@@ -61,3 +61,21 @@ Currently, does not seem to be learning;
 Scores over time on 3x3 Grid with 50000 iterations:
 
 ![Scores](images/3x3_50000.png)
+
+However, the agent does much better than a random agent:
+
+Completely Random Agent:
+
+![Random](images/randomAgent.png)
+
+Completely "Optimal" Agent:
+
+![Best](images/bestPolicyAgent.png)
+
+Hybrid Agent: (random until 100)
+
+![Hybrid](images/hybrid.png)
+
+Hybrid Agent #2: (random until 1000)
+
+![Hybrid2](images/hybrid_2.png)

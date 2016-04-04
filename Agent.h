@@ -88,6 +88,8 @@ public:
 			}
 		}
 
+		//namedPrint(maxDir);
+
 		return maxDir;
 	}
 	double getMax(A_Board& board){
@@ -101,7 +103,7 @@ public:
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		double maxVal=-1.0;
+		double maxVal=-1.0; //what should this be initialied to?
 
 		for(int i=0;i<4;++i){ //or among available actions
 			if(available[i]){
@@ -113,7 +115,6 @@ public:
 				v[s+i] = 0.0; //undo activation
 			}
 		}
-		namedPrint(maxVal);
 		return maxVal;
 	}
 	double getMax(const double* state, const bool* available){

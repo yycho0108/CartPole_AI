@@ -101,10 +101,11 @@ public:
 	bool AIread(DIR& dir){
 		//confidence as param...
 		
-		if (epoch < 0.2*max_epoch) //arbitrary value, 0.2
+		if (epoch < max_epoch/5) //arbitrary border
 			dir = ai.getRand(board);
 		else
 			dir = ai.getNext(board);
+
 		return true;
 	}
 	void run(){

@@ -13,7 +13,6 @@
 
 using namespace arma;
 
-
 double randNum(){
 	static auto _randNum = std::bind(std::uniform_real_distribution<double>(0.0,1.0),std::default_random_engine(time(0))); //random
 	return _randNum();
@@ -38,7 +37,7 @@ public:
 
 	Net(double alpha=0.6, double decay=0.001)
 		:alpha(alpha),decay(decay),n(sizeof...(Args)){
-
+		arma_rng::set_seed_random();
 		init(Args...);
 	}
 	template<typename H1, typename H2>

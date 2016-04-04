@@ -32,7 +32,7 @@ Parameters:
 	- Neural Network seems to be doing fine, simply a numerical instability for small numbers.
 - ~~[ ] Fix Game Logic Bug : Jumping Across Blocks~~
 	- Was Running Old Code
-- [ ] Converting vectors into templates (since they are fixed-size)
+- [x] Converting vectors into templates (since they are fixed-size)
 
 ---
 ## Notes

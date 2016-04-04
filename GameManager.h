@@ -13,10 +13,6 @@
 
 enum : char {RELEASED, PRESSED, REPEATED};
 
-std::vector<int> topology(int n, int m){
-	return std::vector<int>({n*m+4,n*m/2,1});
-}
-
 template<int n, int m>
 class GameManager{
 private:
@@ -26,7 +22,7 @@ private:
 	Board<n,m> board;
 	std::string who;
 public:
-	GameManager(std::string who):who(who),ai(topology(n,m)){
+	GameManager(std::string who):who(who),ai(1){//mSize = 1
 		srand(time(0));
 		for(auto& c : who){
 			c = std::tolower(c);

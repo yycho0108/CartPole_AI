@@ -10,12 +10,14 @@ private:
 	int n; //size
 	vec _I,_O,_G;
 public:
+	Layer();
 	Layer(int n);
 	~Layer();
 	void transfer(vec);
 	vec& I();
 	vec& O();
 	vec& G();
+	void setSize(int);
 	int size();
 };
 

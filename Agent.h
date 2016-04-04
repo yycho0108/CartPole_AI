@@ -19,7 +19,7 @@ struct Memory{
 	bool a_n[4]; //next availability
 	Memory(std::vector<double>& sa, double r, std::vector<double>& s_n, const bool* a_n)
 		:Memory(&sa.front(),r,&s_n.front(),a_n){
-	}
+	} //delegating constructor
 
 	Memory(double* sa, double r, double* s_n, const bool* a_n){
 		memcpy(this->sa,sa,(n+4)*sizeof(double));
@@ -36,14 +36,14 @@ class Agent{
 	using A_Board = Board<n,m>;
 private:
 	float gamma; // gamma = 1 - confidence
-	Net net;
+	Net<n*m+4, n*m/2, 1> net;
 	std::list<A_Memory> memories;
 	int mSize;
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(std::vector<int> t, int mSize=1) //size of memory
-		:net(t,0.6,0.001),mSize(mSize) //learning rate = 0.6, weight decay = 0.001
+	Agent(int mSize=1) //size of memory
+		:net(0.6,0.001) ,mSize(mSize) //learning rate = 0.6, weight decay = 0.001
 	{
 		gamma = 0.8; //basically, how much discount by "time"? 
 	}
@@ -149,8 +149,8 @@ public:
 		if(memories.size() > mSize)
 			memories.pop_front();
 
+		//batch learn
 		learn(memories.back(), alpha);
-
 	}
 };
 

@@ -1,13 +1,21 @@
 #include "Layer.h"
 #include "Utility.h"
 
+Layer::Layer(){
+
+}
+
 Layer::Layer(int n):n(n){
+	setSize(n);
+}
+
+Layer::~Layer(){
+
+}
+void Layer::setSize(int n){
 	_I.set_size(n);
 	_O.set_size(n);
 	_G.set_size(n);
-}
-Layer::~Layer(){
-
 }
 
 void Layer::transfer(vec v){

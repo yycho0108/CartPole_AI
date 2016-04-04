@@ -22,7 +22,7 @@ private:
 	Board<n,m> board;
 	std::string who;
 public:
-	GameManager(std::string who):who(who),ai(1){//mSize = 1
+	GameManager(std::string who):who(who),ai(10){//mSize = 1
 		srand(time(0));
 		for(auto& c : who){
 			c = std::tolower(c);

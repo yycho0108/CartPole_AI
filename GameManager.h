@@ -13,10 +13,6 @@
 
 enum : char {RELEASED, PRESSED, REPEATED};
 
-void hline(){
-	cout << "-------------------------" << endl;
-}
-
 template<int n, int m>
 class GameManager{
 private:
@@ -122,13 +118,7 @@ public:
 		while(CMDread(dir) && epoch < max_epoch){ //select action
 
 			//UPDATE Q-Value
-			std::vector<double> SA = board.vec();//"previous state"
-			auto s = SA.size();
-			
-			SA.resize(s+4);
-			SA[s+(int)dir]=1.0; //action, one-hot encoding
-			
-			//namedPrint(SA);
+			std::vector<double> S = board.vec();//"previous state"
 
 			double r = board.next(dir);
 			//carry out action, observe reward, new state
@@ -153,10 +143,10 @@ public:
 
 				++epoch;
 				//terminal state
-				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
-				alpha = 0.6;
+				alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
+				//alpha = 0.6;
 				//namedPrint(alpha);
-				ai.update(SA,-1.0,board,alpha,true); //-1 for terminal state?
+				ai.update(S,dir,-1.0,board,alpha,true); //-1 for terminal state?
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -171,9 +161,10 @@ public:
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state
-				ai.update(SA,r,board,alpha,true);
+				ai.update(S,dir,r,board,alpha,true);
 				//state, action, reward, maxQ(next), gamma
 			}
+
 		}
 		//viewing the network through 1 iteration
 		

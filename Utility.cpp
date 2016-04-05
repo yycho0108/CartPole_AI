@@ -14,3 +14,11 @@ vec sigmoidPrime(vec& v, bool sig){
 		return s % (1.0-s);
 	}
 }
+
+void hline(){
+	cout << "-------------------------" << endl;
+}
+
+void checkPoint(std::string s){
+	cout << "HERE : " << s <<  endl;
+}

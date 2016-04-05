@@ -46,6 +46,8 @@ n\*m (i.e. 16 for 4X4 grid)
 - [x] ~~Fix Game Logic Bug : Jumping Across Blocks~~
 	- Was Running Old Code
 - [x] Converting vectors into templates (since they are fixed-size)
+- [x] Change Neural Net to Output Q-value for 4 actions as outputs 
+	- (i.e. Q(S) --(net)--> {Q(S,a1),Q(S,a2)...})
 
 ---
 ## Notes

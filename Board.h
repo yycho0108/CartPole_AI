@@ -11,11 +11,11 @@
 
 using namespace std;
 using ull = unsigned long long;
-enum DIR: char {R,U,L,D,X};//X is considered out-of-bounds
-char dirName[5] = {'R','U','L','D','X'};
+enum DIR: char {X=-1,R,U,L,D};//X is considered out-of-bounds
+char dirName[5] = {'X','R','U','L','D'};
 
 std::ostream& operator<<(std::ostream& os, DIR x){
-	return os << dirName[(int)x];
+	return os << dirName[(int)x+1];
 }
 
 template<int n, int m>

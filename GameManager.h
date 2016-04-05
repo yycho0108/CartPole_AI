@@ -26,7 +26,7 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10,0.8,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.8, min_epsilon=0.05
+		:who(who),ai(1,0.8,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.8, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -97,10 +97,10 @@ public:
 		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
 		dir = ai.getNext(board,eps);
 
-		//if (epoch < max_epoch*0.3) //arbitrary border
-		//	dir = ai.getRand(board);//initial random exploration
-		//else
-		//	dir = ai.getNext(board, eps);
+		if (epoch < max_epoch*0.3) //arbitrary border
+			dir = ai.getRand(board);//initial random exploration
+		else
+			dir = ai.getNext(board, eps);
 
 		return true;
 	}
@@ -112,7 +112,7 @@ public:
 
 		double alpha = 1.0; //=learning rate
 		std::vector<int> scores;
-		double maxR=1.0;
+		double maxR=256.0;
 
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action

@@ -9,7 +9,7 @@ echo "Going Into Build Directory..."
 cd build
 
 echo CheBellaC0sa | sudo -S ./2048 $n
-./plot.py
+./plot.py $n
 
 echo "Exiting Build Directory..."
 cd ..

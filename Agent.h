@@ -35,19 +35,27 @@ class Agent{
 	using A_Memory = Memory<n*m>;
 	using A_Board = Board<n,m>;
 private:
-	Net<n*m+4, n*m/2, n*m/2, 1> net; //subject to change
-	double gamma; // gamma = 1 - confidence
-	double epsilon;
+	Net<n*m+4, n*m/2, 1> net; //subject to change
+	double gamma; // gamma = reduction to future rewards
+	double min_eps;
 	std::deque<A_Memory> memories;
 	int mSize; //memory size
 	int rSize; //recall size = # samples to recall
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(int mSize=1, double gamma=0.8, double epsilon=0.05) //size of memory
-		:net(0.3,0.001),gamma(gamma),epsilon(epsilon),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
+		:net(0.6,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.6, weight decay = 0.001
 	{
+		/*std::vector<double> v(n*m+4);
+		for(int i=0;i<4;++i){
+			v[n*m+i] = 1;
+			auto val = net.FF(v);
+			namedPrint(val);
+			v[n*m+i] = 0;
+		}*/
+
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(A_Board& board){
@@ -65,8 +73,8 @@ public:
 	DIR getBest(A_Board& board){
 		//get best purely based on network feedforward q-value
 		std::vector<double> v= board.vec();
-		auto s = v.size();
-		v.resize(s+4);//for 4 DIRs(RULD)
+		auto s = n*m;
+		v.resize(n*m+4);//for 4 DIRs(RULD)
 
 		//currently editing here
 		double maxVal=-99999;
@@ -79,7 +87,7 @@ public:
 				v[s+i] = 1.0; //activate "action"
 				auto val = net.FF(v)[0];
 				//namedPrint(val);
-				if(val > maxVal){
+				if(val > maxVal){ //this is why R was favorite
 					maxVal = val;
 					maxDir = (DIR)i;
 				}
@@ -87,7 +95,6 @@ public:
 
 			}
 		}
-
 		//namedPrint(maxDir);
 
 		return maxDir;
@@ -103,14 +110,13 @@ public:
 		v.resize(s+4);//for 4 DIRs(RULD)
 
 		//currently editing here
-		double maxVal=-1.0; //what should this be initialied to?
+		double maxVal = -1.0; //what should this be initialied to?
 
-		for(int i=0;i<4;++i){ //or among available actions
-			if(available[i]){
+		for(int i=0;i<4;++i){
+			if(available[i]){	// among available actions
 				v[s+i] = 1.0; //activate "action" (r/u/l/d)
 				//V = (S',A')
 				auto val = net.FF(v)[0]; // Q(S',A')
-				//namedPrint(val);
 				maxVal = val>maxVal?val:maxVal;
 				v[s+i] = 0.0; //undo activation
 			}
@@ -121,7 +127,9 @@ public:
 		std::vector<double> v(state,state+n*m);
 		return getMax(v,available);
 	}
-	DIR getNext(A_Board& board){
+	DIR getNext(A_Board& board, double epsilon){
+		epsilon = std::max(min_eps,epsilon); //0.05 = min_epsilon
+		//namedPrint(epsilon);
 		//occasional random exploration
 		//0.9 corresponds to "gamma" .. ish.
 		//e-greedy
@@ -133,42 +141,56 @@ public:
 		const double* s_n = memory.s_n;
 		const bool* a_n = memory.a_n;
 
-		auto qn = getMax(s_n,a_n);
+		auto qnmax = getMax(s_n,a_n);
+		//namedPrint(SA);
 		std::vector<double> y = net.FF(SA); //old value
-		y[0] = (alpha)*y[0] + (1.0-alpha)*(r+gamma*qn); //new value
+		//auto oldy = y[0];
+		y[0] = (alpha)*y[0] + (1-alpha)*(r+gamma*qnmax); //new value
 
 		//std::cout << "<[[" <<std::endl;
 		
 		//namedPrint(r);
 		//namedPrint(qn);
+		//
 		
+		//namedPrint(alpha);
 		//namedPrint(y[0]);
+		//auto dy = y[0]-oldy;
+		//namedPrint(dy/y[0]);
 
 		net.BP(y);
 
 	}
-	void learn_batch(double alpha){
+	void learn_bundle(double alpha){
 		static std::random_device rd;
 		static std::mt19937 eng(rd());
 		static std::uniform_int_distribution<int> distr(0,mSize);
-
 		for(int i=0;i<rSize;++i){
 			//potentially replace with distinct random numbers
 			learn(memories[distr(eng)], alpha);
 		}
 	}
-	void update(std::vector<double>& SA, double r,A_Board& next,double alpha){
+	void learn_bundle(double alpha, int size){
+		for(int i=0;i<size;++i){
+			learn(memories[rand()%memories.size()],alpha);
+		}
+	}
+	void update(std::vector<double>& SA, double r,A_Board& next,double alpha, bool learn=true){
 		//SARSA
 		//State-Action, Reward, Max(next), alpha
+		
 		memories.emplace_back(SA,r,next.vec(),next.getAvailable());
 
-		if(memories.size() > mSize)
-			memories.pop_front();
-
-		if(mSize == memories.size())
-			learn_batch(alpha);
-		else
-			learn(memories.back(), alpha);
+		if(learn){
+			if(memories.size() > mSize){
+				memories.pop_front();
+				learn_bundle(alpha);
+			}else{
+				auto size = std::min(rSize,(int)memories.size());
+				learn_bundle(alpha,size);
+			}
+		}
+		
 	}
 };
 

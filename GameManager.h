@@ -30,24 +30,22 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10,0.8,0.05),max_epoch(max_epoch){//mSize = 1, gamma=0.8, epsilon=0.05
+		:who(who),ai(10,0.8,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.8, min_epsilon=0.05
+
 		srand(time(0));
+
 		for(auto& c : who){
 			c = std::tolower(c);
 		}
-		if(who == "kb"){
-			std::cout << "KB" << endl;
-			const char* dev = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
-			kb = open(dev,O_RDONLY); //read keyboard
-			if(kb == -1){
-				fprintf(stderr,"Cannot open device %s: %s.\n", dev,strerror(errno));
-				close(kb);
-				throw("CANNOT OPEN DEVICE");
-			}
-		}else if (who == "ai"){
-			std::cout << "AI" << endl;
-			//AI SETUP CODE HERE
+		std::cout << "KB" << endl;
+		const char* dev = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
+		kb = open(dev,O_RDONLY); //read keyboard
+		if(kb == -1 && who == "kb"){
+			fprintf(stderr,"Cannot open device %s: %s.\n", dev,strerror(errno));
+			close(kb);
+			throw("CANNOT OPEN DEVICE");
 		}
+		
 		board.print();
 	}
 	~GameManager(){
@@ -99,38 +97,36 @@ public:
 		return true;
 	}
 	bool AIread(DIR& dir){
-		//confidence as param...
-		
-		if (epoch < max_epoch/5) //arbitrary border
-			dir = ai.getRand(board);
-		else
-			dir = ai.getNext(board);
+		//epsilon for e-greedy
+		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
+		dir = ai.getNext(board,eps);
+
+		//if (epoch < max_epoch*0.3) //arbitrary border
+		//	dir = ai.getRand(board);//initial random exploration
+		//else
+		//	dir = ai.getNext(board, eps);
 
 		return true;
 	}
 	void run(){
-
-		std::vector<DIR> dirs;
-
 		DIR dir = X;
 		int score = 0;
 
 		epoch = 0;
 
-		double alpha = 0.1; //= confidence
+		double alpha = 1.0; //=learning rate
 		std::vector<int> scores;
 		double maxR=1.0;
 
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action
-			dirs.push_back(dir);
 
 			//UPDATE Q-Value
 			std::vector<double> SA = board.vec();//"previous state"
 			auto s = SA.size();
 			
 			SA.resize(s+4);
-			SA[s+(int)dir]=1.0; //action
+			SA[s+(int)dir]=1.0; //action, one-hot encoding
 			
 			//namedPrint(SA);
 
@@ -142,9 +138,9 @@ public:
 			score += r;
 
 			//r /= 1024.0; //normalize
-			//r /= maxR;//2048.0; //normalize
-			if(r != 0)
-				r = 1 - 1/r; //bigger the r, closer to 1
+			r /= maxR;//2048.0; //normalize
+			//if(r>0)	
+			//	r = 1 - 1/r; //bigger the r, closer to 1
 
 			//board.print();
 			if(dir==X || board.end()){
@@ -157,9 +153,10 @@ public:
 
 				++epoch;
 				//terminal state
-				alpha = 0.6; //tanh(epoch / max_epoch);
-
-				ai.update(SA,0,board,alpha);//-1 for terminal state?
+				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
+				alpha = 0.6;
+				//namedPrint(alpha);
+				ai.update(SA,-1.0,board,alpha,true); //-1 for terminal state?
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -174,10 +171,30 @@ public:
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state
-				ai.update(SA,r,board,alpha);
+				ai.update(SA,r,board,alpha,true);
 				//state, action, reward, maxQ(next), gamma
 			}
 		}
+		//viewing the network through 1 iteration
+		
+		/*
+
+		board = Board<n,m>();
+		score = 0;
+		while(!board.end()){
+			board.print();
+			dir = ai.getNext(board,0);//no random
+			namedPrint(dir); //=suggestion by AI
+
+			//= my command
+			while(KBread(dir) && dir == X)
+				;
+			auto r = board.next(dir);
+			namedPrint(r);
+			hline();
+		}
+		*/
+		
 
 
 		std::ofstream f_score("scores.csv");
@@ -186,11 +203,11 @@ public:
 		}
 		f_score.close();
 
-		std::ofstream f_dir("dirs.csv");
-		for(auto& d : dirs){
-			f_dir << (int)d << endl;
-		}
-		f_dir.close();
+		//std::ofstream f_dir("dirs.csv");
+		//for(auto& d : dirs){
+		//	f_dir << (int)d << endl;
+		//}
+		//f_dir.close();
 	}
 };
 #endif

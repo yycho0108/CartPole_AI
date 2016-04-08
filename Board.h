@@ -6,6 +6,7 @@
 #include <bitset>
 #include <boost/utility/binary.hpp>
 #include <string.h>
+#include "Utility.h"
 
 #include <algorithm>
 
@@ -30,6 +31,7 @@ private:
 	int _nextR[4] = {}; //next reward
 
 	std::vector<double> v;
+	std::vector<char> cv;
 public:
 	Board(){
 		_end = false;
@@ -37,6 +39,7 @@ public:
 		randTile(_board);
 		checkAvailable();
 		v = toVec(_board);
+		cv = tocVec(_board);
 	};
 
 	void set(int i, int j, char val){
@@ -65,6 +68,7 @@ public:
 		memcpy(_board,_next[dir],sizeof(_board));
 		checkAvailable(); //calculate next available states
 		v = toVec(_board);
+		cv = tocVec(_board);
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
@@ -196,16 +200,28 @@ public:
 	static std::vector<double> toVec(char board[n][m]){
 		std::vector<double> res((char*)board,(char*)board+n*m);
 		//normalize
+		//attempt 1
 		double mv = *std::max_element(res.begin(),res.end());
 		if(mv != 0){//would probably be true, though.
 			for(auto& e : res){
 				e /= mv;
 			}
 		}
+		//attempt 2
+		//for(auto& e : res){
+		//	e = e==0?0:1-1./e;
+		//}
 		return res; 
+	}
+	static std::vector<char> tocVec(char board[n][m]){
+		std::vector<char> res((char*)board,(char*)board+n*m);
+		return res;
 	}
 	std::vector<double>& vec(){
 		return v;
+	}
+	std::vector<char>& cVec(){
+		return cv;
 	}
 	bool isFull(){
 		for(int i=0;i<n;++i){

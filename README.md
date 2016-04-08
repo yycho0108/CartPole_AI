@@ -57,6 +57,8 @@ with a simple multilayer construct.
 If that doesn't suffice, I will implement the Agent with a Convolutional Network.
 Given that the state space is anticipated to be enormous, it is impractical to use a Q-table.
 
+I speculate that the Net doesn't learn very well because the changes in reward that occur due to a "better" move is very small (in the order of 1e-2); a better normalization scheme would be necessary. But how?
+
 ---
 ![Running](images/game.png)
 

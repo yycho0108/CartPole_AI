@@ -42,9 +42,22 @@ public:
 		cv = tocVec(_board);
 	};
 
+	Board(const Board& board){
+		//copying
+		memcpy(_board,board._board,sizeof(_board));
+		addTile = board.addTile;
+		_end = board._end;
+		memcpy(_next,board._next,sizeof(_next));
+		memcpy(_nextDir,board._nextDir,sizeof(_nextDir));
+		memcpy(_nextR,board._nextR,sizeof(_nextR));
+		v = board.v;
+		cv = board.cv;
+	}
+
 	void set(int i, int j, char val){
 		_board[i][j] = val;
 	}
+
 	void randTile(char board[n][m]){// maybe add params to how many random tiles are desired
 		std::vector<int> empty;
 		for(int i=0;i<n;++i){
@@ -60,12 +73,16 @@ public:
 		//
 	}
 
+	std::vector<double> speculate(DIR dir){
+		return toVec(_next[dir]);
+	}
 	int ifnext(DIR dir, char board[n][m]){
 		memcpy(board,_board,sizeof(_board));
 		return next(dir, board);
 	}
 	int next(DIR dir){ //go to precalculated next state
 		memcpy(_board,_next[dir],sizeof(_board));
+		randTile(_board);
 		checkAvailable(); //calculate next available states
 		v = toVec(_board);
 		cv = tocVec(_board);
@@ -180,7 +197,7 @@ public:
 		}
 		if(addTile){
 			//add random tile to empty loc on board
-			randTile(board);
+			//randTile(board);
 		}
 		return reward;
 	}
@@ -205,9 +222,12 @@ public:
 		//should it be normalized??
 		if(mv != 0){//would probably be true, though.
 			for(auto& e : res){
-				e /= mv;
+				e /= 10.0;
 			}
 		}
+		//for(auto& e : res){
+		//	e /= 1024.0;
+		//}
 		//attempt 2
 		//for(auto& e : res){
 		//	e = e==0?0:1-1./e;
@@ -255,19 +275,8 @@ public:
 			if(_nextDir[dir])
 				_end = false; //there exists a fruitful action
 		}
-		//std::cout << "SELF :: " << std::endl;
-		//print(_board);
-		//std::cout << "AVAILABLE :: " << std::endl;
-		//for(int dir=0;dir<4;++dir){
-		//	print(_next[dir]);
-		//}
 	}
 	const bool* getAvailable(){
-		//std::cout << "NEXTDIR : ";
-		//for(int i=0;i<4;++i){
-		//	std::cout << _nextDir[i] << ' ';
-		//}
-		//std::cout << std::endl;
 		return _nextDir;
 	}
 	const char* board(){

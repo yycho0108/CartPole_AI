@@ -26,8 +26,8 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(50,0.6,0.05),max_epoch(max_epoch){
-			//mSize = 500, gamma=0.6, min_epsilon=0.05
+		:who(who),ai(10,0.6,0.05),max_epoch(max_epoch){
+			//mSize = 10, gamma=0.6, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -124,7 +124,8 @@ public:
 
 			//UPDATE Q-Value
 			
-			auto S = board.vec();//"previous state"
+			Board<n,m> S(board);//"previous state"
+			//auto N = board.speculate(dir); //next state without random tiles
 			//auto S = board.cVec();//"previous state"
 
 			double r = board.next(dir);
@@ -145,8 +146,8 @@ public:
 			//board.print();
 			if(dir==X || board.end()){ //terminal state
 
-				//hline();
-				//board.print();
+				hline();
+				board.print();
 				namedPrint(epoch);
 				//namedPrint(score);
 				//hline();

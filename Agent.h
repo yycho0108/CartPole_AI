@@ -140,8 +140,8 @@ public:
 		auto maxqn = getMax(s_n,a_n);
 		//namedPrint(SA);
 		std::vector<double> y = net.FF(s); //old value
-		hline();
-		namedPrint(y);
+		//hline();
+		//namedPrint(y);
 		//auto oldy = y[0];
 		y[(int)a] = (alpha)*y[(int)a] + (1-alpha)*(r+gamma*maxqn); //new value
 
@@ -155,12 +155,12 @@ public:
 		//namedPrint(y[0]);
 		//auto dy = y[0]-oldy;
 		//namedPrint(dy/y[0]);
-		namedPrint(y)
+		//namedPrint(y)
 		net.BP(y);
-		cout << "--> " << endl;
+		//cout << "--> " << endl;
 
-		y = net.FF(s);
-		namedPrint(y);
+		//y = net.FF(s);
+		//namedPrint(y);
 
 
 	}
@@ -297,27 +297,26 @@ public:
 		auto maxqn = getMax(s_n,a_n);
 		//namedPrint(SA);
 		auto y = table.FF(s); //old value
-		hline();
-		namedPrint(y);
+		//hline();
+		//namedPrint(y);
 		//auto oldy = y[0];
-		y[(int)a] = (alpha)*y[(int)a] + (1-alpha)*(r+gamma*maxqn); //new value
+		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
 
 		//std::cout << "<[[" <<std::endl;
 		
 		//namedPrint(r);
-		//namedPrint(qn);
-		//
-		
+		//namedPrint(maxqn);
 		//namedPrint(alpha);
+		
 		//namedPrint(y[0]);
 		//auto dy = y[0]-oldy;
 		//namedPrint(dy/y[0]);
-		namedPrint(y)
+		//namedPrint(y)
 		table.BP(y);
-		cout << "--> " << endl;
+		//cout << "--> " << endl;
 
-		y = table.FF(s);
-		namedPrint(y);
+		//y = table.FF(s);
+		//namedPrint(y);
 	}
 
 	void learn_bundle(double alpha){
@@ -350,6 +349,9 @@ public:
 				learn_bundle(alpha,size);
 			}
 		}
+	}
+	void printTableSize(){
+		namedPrint(table.size());
 	}
 
 	std::vector<double> guess(A_Board& board){

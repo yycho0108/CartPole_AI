@@ -202,6 +202,7 @@ public:
 		//normalize
 		//attempt 1
 		double mv = *std::max_element(res.begin(),res.end());
+		//should it be normalized??
 		if(mv != 0){//would probably be true, though.
 			for(auto& e : res){
 				e /= mv;
@@ -215,6 +216,11 @@ public:
 	}
 	static std::vector<char> tocVec(char board[n][m]){
 		std::vector<char> res((char*)board,(char*)board+n*m);
+		char max = *std::max_element(res.begin(),res.end());
+		for(auto& e : res){ //reduce state space?
+			e -= max;
+		}
+		
 		return res;
 	}
 	std::vector<double>& vec(){

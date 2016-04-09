@@ -26,7 +26,7 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10,0.8,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.8, min_epsilon=0.05
+		:who(who),ai(10,0.6,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.6, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -94,7 +94,8 @@ public:
 	}
 	bool AIread(DIR& dir){
 		//epsilon for e-greedy
-		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
+		//double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
+		double eps = 0.05;
 		dir = ai.getNext(board,eps);
 
 		//if (epoch < max_epoch*0.3) //arbitrary border
@@ -118,6 +119,8 @@ public:
 		while(CMDread(dir) && epoch < max_epoch){ //select action
 
 			//UPDATE Q-Value
+			
+			//auto S = board.vec();//"previous state"
 			auto S = board.cVec();//"previous state"
 
 			double r = board.next(dir);
@@ -143,8 +146,8 @@ public:
 
 				++epoch;
 				//terminal state
-				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
-				alpha = 0.6;
+				alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
+				//alpha = 0.6;
 				//namedPrint(alpha);
 				ai.update(S,dir,-1.0,board,alpha,true); //-1 for terminal state?
 
@@ -166,6 +169,7 @@ public:
 			}
 
 		}
+		ai.printTableSize();
 		//viewing the network through 1 iteration
 		
 		/*

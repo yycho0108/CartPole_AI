@@ -50,12 +50,15 @@ public:
 		auto& v = cache[key];
 		if(v.size()==0){
 			//optimistic outlook
-			v.resize(4,1.0);
+			v.resize(4,0.8);
 		}
 		return v;
 	}
 	void BP(std::vector<double> Y){
 		cache[key].swap(Y);
+	}
+	size_t size(){
+		return cache.size();
 	}
 };
 

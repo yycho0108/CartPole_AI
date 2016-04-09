@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
 	if(argc != 1){
 		max_epoch = std::atoi(argv[1]);
 	}
-	GameManager<2,2> g("ai",max_epoch);
+	GameManager<3,3> g("ai",max_epoch);
 	g.run();
 }
 

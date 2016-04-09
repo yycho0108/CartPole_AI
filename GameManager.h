@@ -17,7 +17,7 @@ template<int n, int m>
 class GameManager{
 private:
 	int kb;
-	Agent<n,m,char> ai;
+	Agent<n,m> ai;
 	input_event ev;
 	Board<n,m> board;
 	std::string who;
@@ -94,8 +94,8 @@ public:
 	}
 	bool AIread(DIR& dir){
 		//epsilon for e-greedy
-		//double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
-		double eps = 0.05;
+		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
+		//double eps = 0.05;
 		dir = ai.getNext(board,eps);
 
 		//if (epoch < max_epoch*0.3) //arbitrary border
@@ -115,13 +115,16 @@ public:
 		std::vector<int> scores;
 		double maxR=256.0;
 
+		std::vector<DIR> dirs;
+
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action
+			dirs.push_back(dir);
 
 			//UPDATE Q-Value
 			
+			auto S = board.vec();//"previous state"
 			//auto S = board.vec();//"previous state"
-			auto S = board.cVec();//"previous state"
 
 			double r = board.next(dir);
 			//carry out action, observe reward, new state
@@ -130,10 +133,10 @@ public:
 			//namedPrint(maxR);
 			score += r;
 
-			//r /= 1024.0; //normalize
+			r /= 1024.0; //normalize
 			//r /= maxR;//2048.0; //normalize
-			if(r>0)	
-				r = 1 - 1/r; //bigger the r, closer to 1
+			//if(r>0)	
+			//	r = 1 - 1/r; //bigger the r, closer to 1
 
 			//board.print();
 			if(dir==X || board.end()){
@@ -169,7 +172,7 @@ public:
 			}
 
 		}
-		ai.printTableSize();
+		//ai.printTableSize();
 		//viewing the network through 1 iteration
 		
 		/*
@@ -197,11 +200,11 @@ public:
 		}
 		f_score.close();
 
-		//std::ofstream f_dir("dirs.csv");
-		//for(auto& d : dirs){
-		//	f_dir << (int)d << endl;
-		//}
-		//f_dir.close();
+		std::ofstream f_dir("dirs.csv");
+		for(auto& d : dirs){
+			f_dir << (int)d << endl;
+		}
+		f_dir.close();
 	}
 };
 #endif

@@ -48,7 +48,7 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.6,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.4,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		/*std::vector<double> v(n*m+4);
@@ -106,7 +106,7 @@ public:
 	}
 	double getMax(std::vector<double>& v,const bool* available){
 		//currently editing here
-		double maxVal = -1.0; //what should this be initialied to?
+		double maxVal = 0.0; //what should this be initialied to?
 		auto a = net.FF(v);
 
 		for(int i=0;i<4;++i){
@@ -299,18 +299,18 @@ public:
 		auto y = table.FF(s); //old value
 		//hline();
 		//namedPrint(y);
-		//auto oldy = y[0];
+		auto oldy = y[0];
 		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
 
 		//std::cout << "<[[" <<std::endl;
 		
-		//namedPrint(r);
-		//namedPrint(maxqn);
+		namedPrint(r);
+		namedPrint(maxqn);
 		//namedPrint(alpha);
 		
 		//namedPrint(y[0]);
-		//auto dy = y[0]-oldy;
-		//namedPrint(dy/y[0]);
+		auto dy = y[0]-oldy;
+		namedPrint(dy);
 		//namedPrint(y)
 		table.BP(y);
 		//cout << "--> " << endl;

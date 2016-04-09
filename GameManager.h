@@ -124,7 +124,7 @@ public:
 			//UPDATE Q-Value
 			
 			auto S = board.vec();//"previous state"
-			//auto S = board.vec();//"previous state"
+			//auto S = board.cVec();//"previous state"
 
 			double r = board.next(dir);
 			//carry out action, observe reward, new state
@@ -133,7 +133,10 @@ public:
 			//namedPrint(maxR);
 			score += r;
 
-			r /= 1024.0; //normalize
+			if(r>0)
+				r = log(r) / 7.624; //7.625 = log(2048)
+
+			//r /= 1024.0; //normalize
 			//r /= maxR;//2048.0; //normalize
 			//if(r>0)	
 			//	r = 1 - 1/r; //bigger the r, closer to 1

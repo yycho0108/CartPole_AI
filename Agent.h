@@ -38,7 +38,7 @@ class Agent{
 	using A_Memory = Memory<n*m,T>;
 	using A_Board = Board<n,m>;
 private:
-	Net<n*m, n*m/2, 4> net; //subject to change
+	Net<n*m, n*m/2, n*m/2, 4> net; //subject to change
 	double gamma; // gamma = reduction to future rewards
 	double min_eps;
 	std::deque<A_Memory> memories;
@@ -48,7 +48,7 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.4,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.6,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		/*std::vector<double> v(n*m+4);
@@ -334,6 +334,11 @@ public:
 			learn(memories[rand()%memories.size()],alpha);
 		}
 	}
+	
+	void setPrev(A_Board& prev){
+		std::vector<char> s = prev.cVec();
+	}
+
 	void update(std::vector<char>& S, DIR a, double r, A_Board& next,double alpha, bool learn=true){
 		//SARSA
 		//State-Action, Reward, Max(next), alpha		

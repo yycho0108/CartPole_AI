@@ -26,7 +26,8 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10,0.6,0.05),max_epoch(max_epoch){//mSize = 100, gamma=0.6, min_epsilon=0.05
+		:who(who),ai(50,0.6,0.05),max_epoch(max_epoch){
+			//mSize = 500, gamma=0.6, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -113,13 +114,13 @@ public:
 
 		double alpha = 1.0; //=learning rate
 		std::vector<int> scores;
-		double maxR=256.0;
+		double maxR = 1.0;
 
-		std::vector<DIR> dirs;
+		//std::vector<DIR> dirs;
 
 		//got rid of maxR because it casts doubts
 		while(CMDread(dir) && epoch < max_epoch){ //select action
-			dirs.push_back(dir);
+			//dirs.push_back(dir);
 
 			//UPDATE Q-Value
 			
@@ -142,20 +143,20 @@ public:
 			//	r = 1 - 1/r; //bigger the r, closer to 1
 
 			//board.print();
-			if(dir==X || board.end()){
+			if(dir==X || board.end()){ //terminal state
 
-				hline();
-				board.print();
+				//hline();
+				//board.print();
 				namedPrint(epoch);
-				namedPrint(score);
-				hline();
+				//namedPrint(score);
+				//hline();
 
 				++epoch;
 				//terminal state
-				alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
-				//alpha = 0.6;
+				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
+				alpha = 0.6;
 				//namedPrint(alpha);
-				ai.update(S,dir,-1.0,board,alpha,true); //-1 for terminal state?
+				ai.update(S,dir,-1.0,board,alpha,true); //-1 for terminal state
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -203,11 +204,11 @@ public:
 		}
 		f_score.close();
 
-		std::ofstream f_dir("dirs.csv");
-		for(auto& d : dirs){
-			f_dir << (int)d << endl;
-		}
-		f_dir.close();
+		//std::ofstream f_dir("dirs.csv");
+		//for(auto& d : dirs){
+		//	f_dir << (int)d << endl;
+		//}
+		//f_dir.close();
 	}
 };
 #endif

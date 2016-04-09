@@ -38,7 +38,7 @@ class Agent{
 	using A_Memory = Memory<n*m,T>;
 	using A_Board = Board<n,m>;
 private:
-	Net<n*m, n*m/2, n*m/2, 4> net; //subject to change
+	Net<n*m, n*m/2, 4> net; //subject to change
 	double gamma; // gamma = reduction to future rewards
 	double min_eps;
 	std::deque<A_Memory> memories;
@@ -107,6 +107,8 @@ public:
 	double getMax(std::vector<double>& v,const bool* available){
 		//currently editing here
 		double maxVal = 0.0; //what should this be initialied to?
+		//(represents value when nothing is available)
+		
 		auto a = net.FF(v);
 
 		for(int i=0;i<4;++i){
@@ -138,17 +140,20 @@ public:
 		const bool* a_n = memory.a_n;
 
 		auto maxqn = getMax(s_n,a_n);
+
 		//namedPrint(SA);
 		std::vector<double> y = net.FF(s); //old value
 		//hline();
 		//namedPrint(y);
 		//auto oldy = y[0];
-		y[(int)a] = (alpha)*y[(int)a] + (1-alpha)*(r+gamma*maxqn); //new value
+		//y[(int)a] = (alpha)*y[(int)a] + (1-alpha)*(r+gamma*maxqn); //new value
+
+		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
 
 		//std::cout << "<[[" <<std::endl;
 		
 		//namedPrint(r);
-		//namedPrint(qn);
+		//namedPrint(maxqn);
 		//
 		
 		//namedPrint(alpha);
@@ -263,7 +268,7 @@ public:
 	}
 	double getMax(std::vector<char>& v,const bool* available){
 		//currently editing here
-		double maxVal = -1.0; //what should this be initialied to?
+		double maxVal = 0.0; //what should this be initialied to?
 		auto a = table.FF(v);
 
 		for(int i=0;i<4;++i){

@@ -31,7 +31,7 @@ class Agent{
 	using A_Memory = Memory<n,m,T>;
 	using A_Board = Board<n,m>;
 private:
-	Net<n*m, n*m/2, 4> net; //subject to change
+	Net<n*m,n*m,4> net; //subject to change
 	double gamma; // gamma = reduction to future rewards
 	double min_eps;
 	std::deque<A_Memory> memories;
@@ -41,7 +41,7 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.6,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.01,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		/*std::vector<double> v(n*m+4);
@@ -76,6 +76,7 @@ public:
 		DIR maxDir=X;
 
 		const bool* available = board.getAvailable();
+		//namedPrint(v);
 
 		auto a = net.FF(v);
 		for(int i=0;i<4;++i){ 
@@ -111,16 +112,18 @@ public:
 	
 	double getMax(std::vector<double>& state){// this is for probabilistic calculation
 		double maxVal = 0.0;
+		int empty=0;
 		//namedPrint(state);
 		for(auto& s : state){
 			if(s == 0){ //= if empty
-				s = 2/10.0;///1024.0;
-				for(auto& e : net.FF(state)){
+				++empty;
+				s = 1/10.0;///1024.0;
+				for(auto& e : net.FF(state)){ //iterate over all Q(S,A)
 					auto val = 0.9 * e;
 					maxVal = maxVal > val? maxVal : val;
 				}
 
-				s = 4/10.0;///1024.0;
+				s = 2/10.0;///1024.0;
 
 				for(auto& e : net.FF(state)){
 					auto val = 0.1 * e;
@@ -130,7 +133,7 @@ public:
 				s = 0; //back to 0
 			}
 		}
-		return maxVal;
+		return maxVal/empty;
 	}
 
 	DIR getNext(A_Board& board, double epsilon){
@@ -144,14 +147,17 @@ public:
 	void learn(A_Memory& memory, double alpha){
 		const DIR a = memory.a;
 		const double r = memory.r;
+		auto& s = memory.s.vec(); 
 
 		auto maxqn = getMax(memory.s_n);
 		//namedPrint(SA);
-		std::vector<double> y = net.FF(memory.s.vec()); //old value
+		std::vector<double> y = net.FF(s); //old value
 		//hline();
 		//namedPrint(y);
-		//auto oldy = y[0];
+		//auto oldy = y;
+		//namedPrint(oldy);
 		//y[(int)a] = (alpha)*y[(int)a] + (1-alpha)*(r+gamma*maxqn); //new value
+		
 
 		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
 
@@ -159,12 +165,10 @@ public:
 		
 		//namedPrint(r);
 		//namedPrint(maxqn);
-		//
+	//	//
 		
 		//namedPrint(alpha);
 		//namedPrint(y[0]);
-		//auto dy = y[0]-oldy;
-		//namedPrint(dy/y[0]);
 		//namedPrint(y)
 		net.BP(y);
 		//cout << "--> " << endl;
@@ -189,24 +193,27 @@ public:
 			learn(memories[rand()%memories.size()],alpha);
 		}
 	}
-	void update(A_Board& S, DIR a, double r, A_Board& next,double alpha, bool learn=true){
+	void update(A_Board& S, DIR a, double r, A_Board& next){
 		//SARSA
 		//State-Action, Reward, Max(next), alpha		
 		memories.emplace_back(S, a, r,next);
 		//this->learn(memories.back(),alpha);
 
-		if(learn){
-			if(memories.size() > mSize){
-				memories.pop_front();
-				learn_bundle(alpha);
-			}else{
-				auto size = std::min(rSize,(int)memories.size());
-				learn_bundle(alpha,size);
-			}
-		}
+		//if(learn){
+		//	if(memories.size() > mSize){
+		//		memories.pop_front();
+		//		learn_bundle(alpha);
+		//	}else{
+		//		auto size = std::min(rSize,(int)memories.size());
+		//		learn_bundle(alpha,size);
+		//	}
+		//}
 	}
 	std::vector<double> guess(A_Board& board){
 		return net.FF(board.vec());
+	}
+	void print(){
+		net.print();
 	}
 };
 #endif

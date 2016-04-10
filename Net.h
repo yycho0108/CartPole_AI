@@ -65,6 +65,7 @@ public:
 		return arma::conv_to<std::vector<double>>::from(L[n-1].O());
 	}	
 	void BP(std::vector<double> Y){
+		//L[n-1].G() = vec(Y) - L[n-1].O();
 		L[n-1].G() = vec(Y) - L[n-1].O();
 		for(size_t i = n-2;i>=1;--i){
 			L[i].G() = W[i].t() * L[i+1].G() % sigmoidPrime(L[i].O(),true);
@@ -73,6 +74,12 @@ public:
 			//alpha = learning rate
 			W[i-1] += alpha * (L[i].G() * L[i-1].O().t() - decay*W[i-1]);
 			B[i-1] += alpha * (L[i].G() - decay*B[i-1]);
+		}
+	}
+	void print(){
+		for(int i=1;i<n;++i){
+			W[i-1].print();
+			B[i-1].print();
 		}
 	}
 

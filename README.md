@@ -84,3 +84,15 @@ Hybrid Agent: (random until 100)
 Hybrid Agent #2: (random until 1000)
 
 ![Hybrid2](images/hybrid_2.png)
+
+
+---
+## Results
+
+![30000](images/scores_avg_30000.png)
+This is the training progress during 30000 iterations of training;
+
+![100000](images/scores_avg_100000.png)
+And this is the training progress over 100000 games played.
+As seen, the average score gets higher and higher by the number of training samples!
+to put in context, a completely random agent achieves ~700 points per round.

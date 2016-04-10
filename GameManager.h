@@ -26,8 +26,8 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10,0.6,0.05),max_epoch(max_epoch){
-			//mSize = 10, gamma=0.6, min_epsilon=0.05
+		:who(who),ai(10000,0.9,0.05),max_epoch(max_epoch){
+			//mSize = 1, gamma=0.8, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -138,6 +138,9 @@ public:
 			if(r>0)
 				r = log(r) / 7.624; //7.625 = log(2048)
 
+			//additional reward # empty tiles
+			//r += board.getEmpty() / float(n*m);
+
 			//r /= 1024.0; //normalize
 			//r /= maxR;//2048.0; //normalize
 			//if(r>0)	
@@ -146,8 +149,8 @@ public:
 			//board.print();
 			if(dir==X || board.end()){ //terminal state
 
-				hline();
-				board.print();
+				//hline();
+				//board.print();
 				namedPrint(epoch);
 				//namedPrint(score);
 				//hline();
@@ -155,9 +158,12 @@ public:
 				++epoch;
 				//terminal state
 				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
-				alpha = 0.6;
-				//namedPrint(alpha);
-				ai.update(S,dir,-1.0,board,alpha,true); //-1 for terminal state
+				alpha = 1.0;
+				//namedPrint(amlpha);
+				ai.update(S,dir,-1.0,board); //-1 for terminal state
+
+				if(epoch % 300 == 0)
+					ai.learn_bundle(alpha, 500);
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -172,31 +178,39 @@ public:
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state
-				ai.update(S,dir,r,board,alpha,true);
+				ai.update(S,dir,r,board);
 				//state, action, reward, maxQ(next), gamma
 			}
 
 		}
+		//ai.print();
 		//ai.printTableSize();
 		//viewing the network through 1 iteration
 		
-		/*
-		board = Board<n,m>();
-		score = 0;
-		while(!board.end()){
-			board.print();
-			auto DO = ai.guess(board);
-			namedPrint(DO);
+		for(int i=0;i<10;++i){
+			board = Board<n,m>();
+			//score = 0;
+			while(!board.end()){
+				board.print();
+				auto DO = ai.guess(board);
+				namedPrint(DO);
 
-			//= my command
-			while(KBread(dir) && dir == X)
-				;
-			auto r = board.next(dir);
-			namedPrint(r);
+				//= my command
+				//while(KBread(dir) && dir == X)
+				//	;
+				dir = ai.getBest(board);
+				//no randomness
+				
+				auto r = board.next(dir);
+
+				hline();
+			}
 			hline();
-		}
-		*/
-		
+			cout << "FINAL STATE : " << endl;
+			board.print();
+			hline();
+		}	
+
 
 
 		std::ofstream f_score("scores.csv");

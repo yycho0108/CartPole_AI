@@ -29,6 +29,7 @@ private:
 	char _next[4][n][m] = {};
 	bool _nextDir[4] = {};
 	int _nextR[4] = {}; //next reward
+	int nEmpty; //# of empty tiles
 
 	std::vector<double> v;
 	std::vector<char> cv;
@@ -37,6 +38,7 @@ public:
 		_end = false;
 		randTile(_board); //put 2 random Tiles
 		randTile(_board);
+		nEmpty = 2;
 		checkAvailable();
 		v = toVec(_board);
 		cv = tocVec(_board);
@@ -83,13 +85,14 @@ public:
 	int next(DIR dir){ //go to precalculated next state
 		memcpy(_board,_next[dir],sizeof(_board));
 		randTile(_board);
+		nEmpty = calcEmpty();
 		checkAvailable(); //calculate next available states
 		v = toVec(_board);
 		cv = tocVec(_board);
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
-		int reward = 0;
+		int reward = 2; //default reward
 		addTile = false;
 		switch(dir){
 			case R:
@@ -218,13 +221,15 @@ public:
 		std::vector<double> res((char*)board,(char*)board+n*m);
 		//normalize
 		//attempt 1
-		double mv = *std::max_element(res.begin(),res.end());
+		//double mv = *std::max_element(res.begin(),res.end());
 		//should it be normalized??
-		if(mv != 0){//would probably be true, though.
-			for(auto& e : res){
-				e /= 10.0;
-			}
+		//
+		for(auto& e : res){
+			e /= 10.0;
 		}
+	//	if(mv != 0){//would probably be true, though.
+	//	
+	//	}
 		//for(auto& e : res){
 		//	e /= 1024.0;
 		//}
@@ -281,6 +286,19 @@ public:
 	}
 	const char* board(){
 		return (const char*) _board;
+	}
+	int calcEmpty(){
+		int e=0;
+		for(int i=0;i<n;++i){
+			for(int j=0;j<m;++j){
+				if(_board[i][j] == 0)
+					++e;
+			}
+		}
+		return e;
+	}
+	int getEmpty(){
+		return nEmpty;
 	}
 };
 

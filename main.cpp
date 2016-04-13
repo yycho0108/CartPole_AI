@@ -39,5 +39,7 @@ int main(int argc, char* argv[]){
 	}
 	GameManager<4,4> g("ai",max_epoch);
 	g.run();
+
+	std::cout << "OVER" << std::endl;
 }
 

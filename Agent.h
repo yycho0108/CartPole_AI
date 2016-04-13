@@ -12,6 +12,13 @@
 auto split = std::uniform_real_distribution<double>();
 std::default_random_engine rng(time(0));
 
+constexpr int ppow(int x, int n){ //positive power
+	return n<1?1:x*ppow(x,n-1);
+}
+constexpr int log2(int x){
+	return (x<2)?0:1+log2(x<<1);
+}
+
 template<int n, int m, typename T=double>// n = state size
 struct Memory{
 	using A_Board = Board<n,m>;
@@ -31,7 +38,7 @@ class Agent{
 	using A_Memory = Memory<n,m,T>;
 	using A_Board = Board<n,m>;
 private:
-	Net<n*m,n*m,4> net; //subject to change
+	Net<n*m,log2(ppow(10,n*m)),4> net; //subject to change
 	double gamma; // gamma = reduction to future rewards
 	double min_eps;
 	std::deque<A_Memory> memories;
@@ -41,7 +48,7 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.01,0.001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.0025,0.0001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		/*std::vector<double> v(n*m+4);

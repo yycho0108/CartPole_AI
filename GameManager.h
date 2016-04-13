@@ -26,7 +26,7 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(10000,0.9,0.05),max_epoch(max_epoch){
+		:who(who),ai(1000,0.9,0.05),max_epoch(max_epoch){
 			//mSize = 1, gamma=0.8, min_epsilon=0.05
 
 		srand(time(0));
@@ -97,6 +97,7 @@ public:
 		//epsilon for e-greedy
 		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
 		//double eps = 0.05;
+		//double eps = 0.0;
 		dir = ai.getNext(board,eps);
 
 		//if (epoch < max_epoch*0.3) //arbitrary border
@@ -119,6 +120,8 @@ public:
 		//std::vector<DIR> dirs;
 
 		//got rid of maxR because it casts doubts
+		int u_freq = 30;
+		int n_update = 200;
 		while(CMDread(dir) && epoch < max_epoch){ //select action
 			//dirs.push_back(dir);
 
@@ -136,7 +139,7 @@ public:
 			score += r;
 
 			if(r>0)
-				r = log(r) / 7.624; //7.625 = log(2048)
+				r = log(r+1) / 7.624; //7.625 = log(2048)
 
 			//additional reward # empty tiles
 			//r += board.getEmpty() / float(n*m);
@@ -162,8 +165,8 @@ public:
 				//namedPrint(amlpha);
 				ai.update(S,dir,-1.0,board); //-1 for terminal state
 
-				if(epoch % 300 == 0)
-					ai.learn_bundle(alpha, 500);
+				if(epoch % u_freq == 0)
+					ai.learn_bundle(alpha, n_update);
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
@@ -187,37 +190,45 @@ public:
 		//ai.printTableSize();
 		//viewing the network through 1 iteration
 		
-		for(int i=0;i<10;++i){
-			board = Board<n,m>();
-			//score = 0;
-			while(!board.end()){
+		board = Board<n,m>();
+		for(int i=0;i<1;++i){
+			while(1){
 				board.print();
+
 				auto DO = ai.guess(board);
 				namedPrint(DO);
+				DIR d = ai.getBest(board);
+				namedPrint(d);
 
-				//= my command
-				//while(KBread(dir) && dir == X)
-				//	;
-				dir = ai.getBest(board);
-				//no randomness
-				
-				auto r = board.next(dir);
+				while(KBread(dir) && dir == X){
+					std::cout << std::endl;
+				}
 
+
+				board.next(dir);
 				hline();
+				if(board.end())
+					break;
 			}
-			hline();
+
 			cout << "FINAL STATE : " << endl;
 			board.print();
 			hline();
 		}	
 
-
-
-		std::ofstream f_score("scores.csv");
+		FILE* f_score = fopen("scores.csv","w");
 		for(auto& s : scores){
-			f_score << s << endl;
+			fprintf(f_score,"%d\n",s);
 		}
-		f_score.close();
+		fclose(f_score);
+
+		//std::ofstream f_score("scores.csv");
+		//for(auto& s : scores){
+		//	
+		//	f_score << s << endl;
+		//}
+		//f_score.flush();
+		//f_score.close();
 
 		//std::ofstream f_dir("dirs.csv");
 		//for(auto& d : dirs){

@@ -52,6 +52,7 @@ public:
 		memcpy(_next,board._next,sizeof(_next));
 		memcpy(_nextDir,board._nextDir,sizeof(_nextDir));
 		memcpy(_nextR,board._nextR,sizeof(_nextR));
+		nEmpty = board.nEmpty;
 		v = board.v;
 		cv = board.cv;
 	}
@@ -92,7 +93,7 @@ public:
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
-		int reward = 2; //default reward
+		int reward = 0; //default reward
 		addTile = false;
 		switch(dir){
 			case R:

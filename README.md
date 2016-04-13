@@ -48,6 +48,7 @@ n\*m (i.e. 16 for 4X4 grid)
 - [x] Change Neural Net to Output Q-value for 4 actions as outputs 
 	- (i.e. Q(S) --(net)--> {Q(S,a1),Q(S,a2)...})
 - [x] Implement RMSProp to automatically adjust learning rate
+	- Decided to use AdaDelta instead
 
 ---
 ## Notes

@@ -48,7 +48,8 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.0025,0.0001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.99, 0.00001, 0.0001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		//rho, eps, decay
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		/*std::vector<double> v(n*m+4);
@@ -178,6 +179,7 @@ public:
 		//namedPrint(y[0]);
 		//namedPrint(y)
 		net.BP(y);
+		namedPrint(net.error());
 		//cout << "--> " << endl;
 
 		//y = net.FF(s);

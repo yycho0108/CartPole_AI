@@ -162,7 +162,7 @@ public:
 				//terminal state
 				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
 				alpha = 1.0;
-				//namedPrint(amlpha);
+				//namedPrint(alpha);
 				ai.update(S,dir,-1.0,board); //-1 for terminal state
 
 				if(epoch % u_freq == 0)

@@ -226,7 +226,7 @@ public:
 		//should it be normalized??
 		//
 		for(auto& e : res){
-			e /= 10.0;
+			e /= 10.0; //log scale, div by 1024.
 		}
 	//	if(mv != 0){//would probably be true, though.
 	//	

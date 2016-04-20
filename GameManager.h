@@ -26,8 +26,8 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(1000,0.9,0.05),max_epoch(max_epoch){
-			//mSize = 1, gamma=0.8, min_epsilon=0.05
+		:who(who),ai(1,0.8,0.05),max_epoch(max_epoch){
+			//mSize = 1000, gamma=0.8, min_epsilon=0.05
 
 		srand(time(0));
 
@@ -113,16 +113,21 @@ public:
 
 		epoch = 0;
 
-		double alpha = 1.0; //=learning rate
-		std::vector<int> scores;
-		double maxR = 1.0;
+		double alpha = 0.001; //=learning rate
+		double maxR = 256.0;
 
 		//std::vector<DIR> dirs;
-
+		//
+		std::ofstream fscore("score.csv");
+		std::ofstream ferr("loss.csv");
 		//got rid of maxR because it casts doubts
-		int u_freq = 30;
-		int n_update = 200;
+		int u_freq = 1;
+		int n_update = 1;
+		int step = 0;
 		while(CMDread(dir) && epoch < max_epoch){ //select action
+
+			if(epoch > 0.95*max_epoch)
+				ai.verbose() = true;
 			//dirs.push_back(dir);
 
 			//UPDATE Q-Value
@@ -132,14 +137,18 @@ public:
 			//auto S = board.cVec();//"previous state"
 
 			double r = board.next(dir);
+			r = board.getEmpty();
 			//carry out action, observe reward, new state
+
+			score += r;
 
 			maxR = r>maxR?r:maxR;
 			//namedPrint(maxR);
-			score += r;
-
-			if(r>0)
-				r = log(r+1) / 7.624; //7.625 = log(2048)
+			
+			//if(r>0)
+			//	r = log(r+1) / 7.624; //7.625 = log(2048)
+			r /= n*m; //reward = # of enmpty tiles
+			//r /= maxR;
 
 			//additional reward # empty tiles
 			//r += board.getEmpty() / float(n*m);
@@ -161,19 +170,16 @@ public:
 				++epoch;
 				//terminal state
 				//alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
-				alpha = 1.0;
 				//namedPrint(alpha);
-				ai.update(S,dir,-1.0,board); //-1 for terminal state
+				ai.memorize(S,dir,-1.0,board); //-1 for terminal state
 
-				if(epoch % u_freq == 0)
-					ai.learn_bundle(alpha, n_update);
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
-				scores.push_back(score);
+				fscore << score << std::endl;
+				score = 0;
 
 				board = Board<n,m>();
-				score = 0;
 				//namedPrint(epoch);
 			}else{
 				//usual state
@@ -181,46 +187,54 @@ public:
 				// v = previous state
 				// mv = max of this state given optimal policy
 				// r = reward of reaching this state
-				ai.update(S,dir,r,board);
+				ai.memorize(S,dir,r,board);
 				//state, action, reward, maxQ(next), gamma
+			}
+
+			if(++step % u_freq == 0){
+				ferr << ai.learn_bundle(alpha, n_update) << endl;
 			}
 
 		}
 		//ai.print();
 		//ai.printTableSize();
 		//viewing the network through 1 iteration
-		
-		board = Board<n,m>();
-		for(int i=0;i<1;++i){
-			while(1){
-				board.print();
+		char test;	
+		std::cout << "TEST? " << std::endl;
+		std::cin >> test;
+		test = std::tolower(test);
+		if(test == 'y'){
+			board = Board<n,m>();
+			for(int i=0;i<1;++i){
+				while(1){
+					board.print();
 
-				auto DO = ai.guess(board);
-				namedPrint(DO);
-				DIR d = ai.getBest(board);
-				namedPrint(d);
+					auto DO = ai.guess(board);
+					namedPrint(DO);
+					DIR d = ai.getBest(board);
+					namedPrint(d);
 
-				while(KBread(dir) && dir == X){
-					std::cout << std::endl;
+					while(KBread(dir) && dir == X){
+						std::cout << std::endl;
+					}
+
+					board.next(dir);
+					hline();
+					if(board.end())
+						break;
 				}
 
-
-				board.next(dir);
+				cout << "FINAL STATE : " << endl;
+				board.print();
 				hline();
-				if(board.end())
-					break;
-			}
-
-			cout << "FINAL STATE : " << endl;
-			board.print();
-			hline();
-		}	
-
-		FILE* f_score = fopen("scores.csv","w");
-		for(auto& s : scores){
-			fprintf(f_score,"%d\n",s);
+			}	
 		}
-		fclose(f_score);
+
+		ferr.flush();
+		ferr.close();
+
+		fscore.flush();
+		fscore.close();
 
 		//std::ofstream f_score("scores.csv");
 		//for(auto& s : scores){

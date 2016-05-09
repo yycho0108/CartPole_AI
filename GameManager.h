@@ -28,7 +28,7 @@ private:
 	int max_epoch;
 public:
 	GameManager(std::string who, int max_epoch)
-		:who(who),ai(1,0.8,0.05),max_epoch(max_epoch){
+		:who(who),ai(1000,0.8,0.05),max_epoch(max_epoch){
 			//mSize = 1000, gamma=0.8, min_epsilon=0.05
 
 		srand(time(0));
@@ -123,8 +123,8 @@ public:
 		std::ofstream ftrain("train.csv");
 		std::ofstream ferr("loss.csv");
 		//got rid of maxR because it casts doubts
-		int u_freq = 1;
-		int n_update = 1;
+		int u_freq = 50;
+		int n_update = 200;
 		int step = 0;
 
 		while(CMDread(dir) && epoch < max_epoch){ //select action
@@ -197,7 +197,8 @@ public:
 				//state, action, reward, maxQ(next), gamma
 			}
 
-			if(++step % u_freq == 0){
+			++step;
+			if((step>n_update) && (step % u_freq == 0)){
 				ferr << ai.learn_bundle(alpha, n_update)/(alpha*alpha) << endl;
 			}
 

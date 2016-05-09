@@ -4,6 +4,7 @@
 #include <random>
 #include <ctime>
 #include <deque>
+#include <cassert>
 #include "Net.h"
 #include "Board.h"
 #include "Table.h"
@@ -37,7 +38,7 @@ template<int n, int m, typename T = double> //double/float = cannot use table, m
 class Agent{
 	using A_Memory = Memory<n,m,T>;
 	using A_Board = Board<n,m>;
-	static const int H = log2(ppow(10,n*m))*4;
+	static const int H = log2(ppow(10,n*m))/2;
 private:
 	Net<n*m,H,4> net; //subject to change
 	double gamma; // gamma = reduction to future /ewards
@@ -50,20 +51,12 @@ private:
 	//output = Q-value
 public:
 	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.8, 0.00001, 0.0),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+		:net(0.9, 0.0001, 0.0001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
 		//rho, eps, decay
 		//learning rate = 0.3, weight decay = 0.001
 	{
 		_verbose = false;
 		std::cout << H << std::endl;
-		/*std::vector<double> v(n*m+4);
-		for(int i=0;i<4;++i){
-			v[n*m+i] = 1;
-			auto val = net.FF(v);
-			namedPrint(val);
-			v[n*m+i] = 0;
-		}*/
-
 	}
 	//Agent Saving/Loading (to/from file) ... To Be Added
 	DIR getRand(A_Board& board){
@@ -77,15 +70,16 @@ public:
 			}
 		}
 		auto p = split(rng);
-
-		return av[int(av.size()*p)];// if av.size()==3 then ranges from 0~2.9999, end-exclusive
+		auto a = av[int(av.size())*p];
+		assert(a != X);
+		return a;// if av.size()==3 then ranges from 0~2.9999, end-exclusive
 	}	
 
 	DIR getBest(A_Board& board){
 		//get best purely based on network feedforward q-value
 		std::vector<double>& v= board.vec();
 		//currently editing here
-		double maxVal=-99999;
+		double maxVal=-99999;//reasonably small value
 		DIR maxDir=X;
 
 		const bool* available = board.getAvailable();
@@ -103,6 +97,7 @@ public:
 		}
 		//namedPrint(maxDir);
 
+		assert(maxDir != X);
 		return maxDir;
 	}
 
@@ -110,14 +105,17 @@ public:
 		//split this function as this serves an entirely new purpose...ish.
 		double maxVal = 0.0;
 		const bool* available = board.getAvailable();
-		for(int i=0;i<4;++i){
-			if(available[i]){
-				auto nexti = board.speculate((DIR)i);
+		auto s = board.vec();
+		auto y = net.FF(s);
+		for(int a=0;a<4;++a){
+			if(available[a]){
+				//auto nexti = board.speculate((DIR)i);
 				//board.print();
 				//namedPrint((DIR)i);
 				//namedPrint(nexti);
 
-				auto val = getMax(nexti);
+				//auto val = getMax(nexti);
+				auto val = y[a];
 				maxVal = maxVal>val?maxVal:val;
 			}
 		}
@@ -162,13 +160,15 @@ public:
 		return (split(rng) < epsilon)? getRand(board) : getBest(board);
 	}
 	double learn(A_Memory& memory, double alpha){
+		static std::vector<double> y;
 		const DIR a = memory.a;
 		const double r = memory.r;
 		auto& s = memory.s.vec(); 
 
 		auto maxqn = getMax(memory.s_n);
 		//namedPrint(SA);
-		std::vector<double> y = net.FF(s); //old value
+		y = net.FF(s);
+		//std::vector<double> y = net.FF(s); //old value
 
 		if(_verbose){
 			hline();
@@ -177,6 +177,8 @@ public:
 		}
 		//auto oldy = y;
 		//namedPrint(oldy);
+		//namedPrint(alpha);
+		//namedPrint(gamma);
 
 		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
 
@@ -187,15 +189,22 @@ public:
 			namedPrint(maxqn);
 			namedPrint(y)
 		}	
-
 		net.BP(y);
 
 		if(_verbose){
-			cout << "--> " << endl;
-			y = net.FF(s);
-			namedPrint(y);
+			cout << "-->" << endl;
+			auto yp = net.FF(s);
+			namedPrint(yp);
+			/*
+			//for debugging purposes...
+			cout << "TESTING BP" << endl;
+			for(int i=0;i<10;++i){
+				namedPrint(net.FF(s));
+				net.BP(y);
+			}
+			*/
 		}
-
+		
 		return net.error();
 	}
 	double learn_bundle(double alpha){
@@ -220,7 +229,7 @@ public:
 	void memorize(A_Board& S, DIR a, double r, A_Board& next){
 		//SARSA
 		//State-Action, Reward, Max(next), alpha		
-		memories.emplace_back(S, a, r,next);
+		memories.emplace_back(S, a, r, next);
 		if(memories.size() > mSize){
 			memories.pop_front();
 		}
@@ -237,7 +246,8 @@ public:
 		//}
 	}
 	std::vector<double> guess(A_Board& board){
-		return net.FF(board.vec());
+		auto& s = board.vec();
+		return net.FF(s);
 	}
 	void print(){
 		net.print();

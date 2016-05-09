@@ -1,5 +1,4 @@
 #include "Layer.h"
-#include "Utility.h"
 
 Layer::Layer(){
 
@@ -18,10 +17,15 @@ void Layer::setSize(int n){
 	_G.set_size(n);
 }
 
+void Layer::setT(tfun f, tfun_d f_d){
+	this->f = f;
+	this->f_d = f_d;
+}
+
 void Layer::transfer(vec v){
 	_I.swap(v);
 	//_O = _I;
-	_O = sigmoid(_I);
+	_O = f(_I);
 	//cout << "I" << arma::size(_I) << endl;
 	//cout << "O" << arma::size(_O) << endl;
 //	_O.for_each([](mat::elem_type& val){val = sigmoid(val);});

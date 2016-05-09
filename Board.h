@@ -32,16 +32,9 @@ private:
 	int nEmpty; //# of empty tiles
 
 	std::vector<double> v;
-	std::vector<char> cv;
 public:
 	Board(){
-		_end = false;
-		randTile(_board); //put 2 random Tiles
-		randTile(_board);
-		nEmpty = 2;
-		checkAvailable();
-		v = toVec(_board);
-		cv = tocVec(_board);
+		reset();
 	};
 
 	Board(const Board& board){
@@ -54,7 +47,19 @@ public:
 		memcpy(_nextR,board._nextR,sizeof(_nextR));
 		nEmpty = board.nEmpty;
 		v = board.v;
-		cv = board.cv;
+	}
+
+	void reset(){
+		memset(_board,0,sizeof(_board));
+		_end = false;
+		addTile = false;
+
+		randTile(_board);
+		randTile(_board);
+
+		nEmpty = n*m - 2;
+		checkAvailable();
+		v = toVec(_board);
 	}
 
 	void set(int i, int j, char val){
@@ -89,7 +94,6 @@ public:
 		nEmpty = calcEmpty();
 		checkAvailable(); //calculate next available states
 		v = toVec(_board);
-		cv = tocVec(_board);
 		return _nextR[dir];
 	}
 	int next(DIR dir, char board[n][m]){
@@ -252,9 +256,6 @@ public:
 	std::vector<double>& vec(){
 		return v;
 	}
-	std::vector<char>& cVec(){
-		return cv;
-	}
 	bool isFull(){
 		for(int i=0;i<n;++i){
 			for(int j=0;j<m;++j){
@@ -300,6 +301,16 @@ public:
 	}
 	int getEmpty(){
 		return nEmpty;
+	}
+	int max(){
+		int maxVal = 0;
+		for(int i=0;i<n;++i){
+			for(int j=0;j<m;++j){
+				auto val = _board[i][j];
+				maxVal = val>maxVal? val:maxVal;
+			}
+		}
+		return maxVal;
 	}
 };
 

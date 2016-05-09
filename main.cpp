@@ -13,15 +13,18 @@ using namespace std;
 //	if(argc != 1){
 //		lim = std::atoi(argv[1]);
 //	}
-//	Net<2,4,1> net(0.6,0.001); //for learning rate & decay use default
+//	Net<2,6,1> net(0.99,0.0001); //for learning rate & decay use default
 //	std::vector<double> X(2);
 //	std::vector<double> Y(1);
 //
 //	auto start = clock();
 //	for(int i=0;i<lim;++i){
 //		XOR_GEN(X,Y);
-//		net.FF(X);
+//		namedPrint(net.FF(X));
+//		namedPrint(Y);
 //		net.BP(Y);
+//		std::cout << "--> " << std::endl;
+//		namedPrint(net.FF(X));
 //	}
 //	auto end = clock();
 //	printf("Took %f seconds", float(end-start)/CLOCKS_PER_SEC);

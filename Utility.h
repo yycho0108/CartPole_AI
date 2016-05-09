@@ -6,8 +6,12 @@
 #include <iostream>
 using namespace arma;
 double sigmoid(double);
+
 vec sigmoid(vec&);
 vec sigmoidPrime(vec&,bool);
+
+vec tanh(vec&);
+vec tanhPrime(vec&, bool);
 
 template<typename T>
 std::ostream& operator<<(std::ostream& o, std::vector<T> v){
@@ -22,6 +26,18 @@ std::ostream& operator<<(std::ostream& o, std::vector<T> v){
 extern void hline();
 extern void checkPoint(std::string s="");
 
+extern bool prompt(std::string query);
+using tfun = vec (*)(vec&);
+using tfun_d = vec (*)(vec&,bool);
+
+
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
 #define namedPrint(x) \
 	std::cout << #x << " : " << x << std::endl;
+
+#define alert() \
+	std::cout << "HERE AT [" << __FILENAME__ << ':' << __LINE__ << ']' << std::endl;
+
 #endif
+

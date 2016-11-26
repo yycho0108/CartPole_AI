@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Board.h"
 #include "Agent.h"
+#include "Params.h"
 #include <linux/input.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -25,19 +26,20 @@ private:
 	std::string who;
 
 	int epoch;
-	int max_epoch;
 public:
-	GameManager(std::string who, int max_epoch)
-		:who(who),ai(1000,0.8,0.05),max_epoch(max_epoch){
-			//mSize = 1000, gamma=0.8, min_epsilon=0.05
+	GameManager(std::string who)
+		:who(who){
 
 		srand(time(0));
 
 		for(auto& c : who){
 			c = std::tolower(c);
 		}
+
 		std::cout << "KB" << endl;
+
 		const char* dev = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
+
 		kb = open(dev,O_RDONLY); //read keyboard
 		if(kb == -1 && who == "kb"){
 			fprintf(stderr,"Cannot open device %s: %s.\n", dev,strerror(errno));
@@ -97,9 +99,12 @@ public:
 	}
 	bool AIread(DIR& dir){
 		//epsilon for e-greedy
-		double eps = 1.0 - tanh(2*float(epoch)/max_epoch); //somewhat arbitrary, but maybe?
-		//double eps = 0.05;
-		//double eps = 0.0;
+		//double eps = 1.0 - (epoch / MAX_EPOCH);
+		double eps = 1.0 - tanh(2*float(epoch)/MAX_EPOCH); //somewhat arbitrary, but maybe?
+
+		if(eps < MIN_EPS)
+			eps = MIN_EPS;
+
 		dir = ai.getNext(board,eps);
 
 		//if (epoch < max_epoch*0.3) //arbitrary border
@@ -115,19 +120,20 @@ public:
 
 		epoch = 0;
 
-		double alpha = 0.01; //=learning rate
+		double alpha = ALPHA; //=learning rate
 		double maxR = 256.0;
 
 		//std::vector<DIR> dirs;
 		//
 		std::ofstream ftrain("train.csv");
 		std::ofstream ferr("loss.csv");
+		std::ofstream freward("rewards.csv");
 		//got rid of maxR because it casts doubts
 		int u_freq = 50;
 		int n_update = 200;
 		int step = 0;
 
-		while(CMDread(dir) && epoch < max_epoch){ //select action
+		while(CMDread(dir) && epoch < MAX_EPOCH){ //select action
 			//if(epoch > 0.95*max_epoch)
 			//	ai.verbose() = true;
 			//dirs.push_back(dir);
@@ -141,7 +147,10 @@ public:
 			double r = board.next(dir);
 			score += r;
 
-			r = log(r+1) / 7.625;
+			r = log (r+1) / 7.625;
+			//r = (r - 4.12) / 288; // standardize
+
+			freward << r << '\n';
 			//r += float(board.getEmpty()) / (n*m);
 
 			//r /= 2.0;
@@ -166,23 +175,24 @@ public:
 
 			//board.print();
 			if(dir==X || board.end()){ //terminal state
+				namedPrint(epoch);
+				++epoch;
 
 				//hline();
 				//board.print();
-				namedPrint(epoch);
 				//namedPrint(score);
 				//hline();
 
-				++epoch;
-				//terminal state
-				alpha = 1.0 - tanh(2*float(epoch) / max_epoch); // = learning rate
+				// alpha = 1.0 - tanh(2*float(epoch) / MAX_EPOCH); // = learning rate
+				// no alpha annealing
+				
 				//namedPrint(alpha);
 				ai.memorize(S,dir,-1.0,board); //-1 for terminal state
 
 
 				//const char* b = board.board();
 				//score = *std::max_element(b,b+n*m);
-				ftrain << score << std::endl;
+				ftrain << score << '\n';
 				score = 0;
 
 				board.reset();
@@ -199,7 +209,8 @@ public:
 
 			++step;
 			if((step>n_update) && (step % u_freq == 0)){
-				ferr << ai.learn_bundle(alpha, n_update)/(alpha*alpha) << endl;
+				ferr << ai.learn_bundle(alpha, n_update)/(alpha*alpha) << '\n';
+				ai.freeze(); // how often should I freeze?
 			}
 
 		}
@@ -208,10 +219,9 @@ public:
 		//viewing the network through 1 iteration
 		//
 		ai.verbose() = true;	
-		int num_test = 100;	
 		std::ofstream ftest("test.csv");	
-		if(prompt("TEST?")){
-			for(int i=0;i<num_test;++i){
+		if(true || prompt("TEST?")){
+			for(int i=0;i<NUM_TEST;++i){
 				board = Board<n,m>();
 				while(!board.end()){
 					auto DO = ai.guess(board);
@@ -220,7 +230,7 @@ public:
 					namedPrint(dir);
 					board.next(dir);
 				}
-				ftest << (2 << board.max()) << std::endl;
+				ftest << (2 << board.max()) << '\n';
 				board.print();
 				hline();
 			}

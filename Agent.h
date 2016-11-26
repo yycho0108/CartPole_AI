@@ -9,6 +9,7 @@
 #include "Board.h"
 #include "Table.h"
 #include "Utility.h"
+#include "Params.h"
 
 auto split = std::uniform_real_distribution<double>();
 std::default_random_engine rng(time(0));
@@ -40,21 +41,23 @@ class Agent{
 	using A_Board = Board<n,m>;
 	static const int H = log2(ppow(10,n*m))/2;
 private:
+
 	Net<n*m,H,4> net; //subject to change
-	double gamma; // gamma = reduction to future /ewards
-	double min_eps;
+	Net<n*m,H,4> target_net; //target network
+
 	std::deque<A_Memory> memories;
-	int mSize; //memory size
 	int rSize; //recall size = # samples to recall
 	bool _verbose;
 	//input = 4x4 = 16 states + 4 actions
 	//output = Q-value
 public:
-	Agent(int mSize=1, double gamma=0.8, double min_eps=0.05) //size of memory
-		:net(0.9, 0.0001, 0.0001),gamma(gamma),min_eps(min_eps),mSize(mSize),rSize(1>mSize/3?1:mSize/3)
+	Agent() //size of memory
+		:net(0.9, 0.0001, WEIGHT_DECAY),rSize(1>MEM_SIZE/3?1:MEM_SIZE/3)
 		//rho, eps, decay
 		//learning rate = 0.3, weight decay = 0.001
 	{
+		net.copyTo(target_net); // same weights for starters
+
 		_verbose = false;
 		std::cout << H << std::endl;
 	}
@@ -85,7 +88,7 @@ public:
 		const bool* available = board.getAvailable();
 		//namedPrint(v);
 
-		auto a = net.FF(v);
+		auto a = target_net.FF(v);
 		for(int i=0;i<4;++i){ 
 			if(available[i]){ //among available actions
 				//namedPrint(val);
@@ -106,7 +109,7 @@ public:
 		double maxVal = 0.0;
 		const bool* available = board.getAvailable();
 		auto s = board.vec();
-		auto y = net.FF(s);
+		auto y = target_net.FF(s);
 		for(int a=0;a<4;++a){
 			if(available[a]){
 				//auto nexti = board.speculate((DIR)i);
@@ -130,14 +133,14 @@ public:
 			if(s == 0){ //= if empty
 				++empty;
 				s = 1/10.0;///fill with 2, div. 1024.0 normalization;
-				for(auto& e : net.FF(state)){ //iterate over all Q(S,A)
+				for(auto& e : target_net.FF(state)){ //iterate over all Q(S,A)
 					auto val = 0.9 * e;
 					maxVal = maxVal > val? maxVal : val;
 				}
 
 				s = 2/10.0;///fill with 4, div. 1024.0;
 
-				for(auto& e : net.FF(state)){
+				for(auto& e : target_net.FF(state)){
 					auto val = 0.1 * e;
 					maxVal = maxVal > val? maxVal : val;
 				}
@@ -152,13 +155,14 @@ public:
 	}
 
 	DIR getNext(A_Board& board, double epsilon){
-		epsilon = std::max(min_eps,epsilon); //0.05 = min_epsilon
+		epsilon = std::max(MIN_EPS,epsilon); //0.05 = MIN_EPSilon
 		//namedPrint(epsilon);
 		//occasional random exploration
 		//0.9 corresponds to "gamma" .. ish.
 		//e-greedy
 		return (split(rng) < epsilon)? getRand(board) : getBest(board);
 	}
+
 	double learn(A_Memory& memory, double alpha){
 		static std::vector<double> y;
 		const DIR a = memory.a;
@@ -166,8 +170,10 @@ public:
 		auto& s = memory.s.vec(); 
 
 		auto maxqn = getMax(memory.s_n);
-		//namedPrint(SA);
-		y = net.FF(s);
+
+		// stabilizing with target network
+		y = target_net.FF(s); // compute target
+
 		//std::vector<double> y = net.FF(s); //old value
 
 		if(_verbose){
@@ -180,7 +186,7 @@ public:
 		//namedPrint(alpha);
 		//namedPrint(gamma);
 
-		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+gamma*maxqn); //new value
+		y[(int)a] = (1-alpha)*y[(int)a] + (alpha)*(r+GAMMA*maxqn); //new value
 
 		//std::cout << "<[[" <<std::endl;
 		
@@ -189,7 +195,9 @@ public:
 			namedPrint(maxqn);
 			namedPrint(y)
 		}	
-		net.BP(y);
+
+		auto yp = net.FF(s); // compuete output
+		net.BP(y); // back-propagate against target
 
 		if(_verbose){
 			cout << "-->" << endl;
@@ -208,14 +216,15 @@ public:
 		return net.error();
 	}
 	double learn_bundle(double alpha){
-		//static std::random_device rd;
-		//static std::mt19937 eng(rd());
-		//static std::uniform_int_distribution<int> distr(0,mSize);
+		static std::random_device rd;
+		static std::mt19937 eng(rd());
+		static std::uniform_int_distribution<int> distr(0,MEM_SIZE);
+
 		double sum = 0;
 		for(int i=0;i<rSize;++i){
 			//potentially replace with distinct random numbers
-			//learn(memories[distr(eng)], alpha);
-			sum += learn(memories[rand()%mSize],alpha);
+			sum += learn(memories[distr(eng)], alpha);
+			//sum += learn(memories[rand() % MEM_SIZE],alpha);
 		}
 		return sum/rSize;
 	}
@@ -227,16 +236,18 @@ public:
 		return sum/size; //average
 	}
 	void memorize(A_Board& S, DIR a, double r, A_Board& next){
+
 		//SARSA
 		//State-Action, Reward, Max(next), alpha		
+		
 		memories.emplace_back(S, a, r, next);
-		if(memories.size() > mSize){
+		if(memories.size() > MEM_SIZE){
 			memories.pop_front();
 		}
 		//this->learn(memories.back(),alpha);
 
 		//if(learn){
-		//	if(memories.size() > mSize){
+		//	if(memories.size() > MEM_SIZE){
 		//		memories.pop_front();
 		//		learn_bundle(alpha);
 		//	}else{
@@ -245,15 +256,23 @@ public:
 		//	}
 		//}
 	}
+
+	void freeze(){
+		net.copyTo(target_net);
+	}
+
 	std::vector<double> guess(A_Board& board){
 		auto& s = board.vec();
 		return net.FF(s);
 	}
+
 	void print(){
 		net.print();
 	}
+
 	bool& verbose(){
 		return _verbose;
 	}
+
 };
 #endif

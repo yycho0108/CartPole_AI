@@ -7,8 +7,6 @@
 #include <ctime>
 #include <random>
 
-
-
 using namespace arma;
 using namespace std;
 Net::Net(std::vector<int> t, double alpha,double decay):t(t),alpha(alpha),decay(decay){
@@ -49,4 +47,3 @@ void XOR_GEN(std::vector<double>& X, std::vector<double>& Y){
 	X[1] = randNum()>0.5?1:0;
 	Y[0] = int(X[0]) ^ int(X[1]);
 }
-

@@ -13,6 +13,9 @@ vec sigmoidPrime(vec&,bool);
 vec tanh(vec&);
 vec tanhPrime(vec&, bool);
 
+vec relu(vec&);
+vec reluPrime(vec&, bool);
+
 template<typename T>
 std::ostream& operator<<(std::ostream& o, std::vector<T> v){
 	o << '[';

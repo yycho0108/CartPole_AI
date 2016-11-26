@@ -1,15 +1,3 @@
 #!/bin/bash
-n=500
-
-if [[ "$#" -eq 1 ]]; then
-	n=$1
-fi
-
-echo "Going Into Build Directory..."
-cd build
-
-echo CheBellaC0sa | sudo -S ./2048 $n
-./plot.py $n
-
-echo "Exiting Build Directory..."
-cd ..
+./build/2048
+./plot.py

@@ -31,6 +31,24 @@ vec tanhPrime(vec& v, bool sig){
 	}
 }
 
+double relu(double& v){
+	return v>0?v:0;
+}
+double reluPrime(double& v){
+	return v>0?1:0;
+}
+
+vec relu(vec& v){
+	vec res = v;
+	res.transform([](double v){return v>0?v:0;});
+	return res;
+}
+
+vec reluPrime(vec& v, bool){
+	vec res = v;
+	res.transform([](double v){return v>0?1:0;});
+	return res;
+}
 void hline(){
 	cout << "-------------------------" << endl;
 }

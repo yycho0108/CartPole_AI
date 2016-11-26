@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(2048)
+project(CartPole)
 
 find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
@@ -29,12 +29,10 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/Utility.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Layer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Net.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Board.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Table.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Agent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/GameManager.h
 )
 
-add_executable(2048 ${SOURCES} ${HEADERS})
+add_executable(CartPole ${SOURCES} ${HEADERS})
 
-target_link_libraries(2048 ${ARMADILLO_LIBRARIES})	
+target_link_libraries(CartPole ${ARMADILLO_LIBRARIES})	

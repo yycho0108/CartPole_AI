@@ -7,14 +7,20 @@
 using namespace arma;
 double sigmoid(double);
 
-vec sigmoid(vec&);
-vec sigmoidPrime(vec&,bool);
+mat sigmoid(mat&);
+mat sigmoidPrime(mat&,bool);
 
-vec tanh(vec&);
-vec tanhPrime(vec&, bool);
+mat tanh(mat&);
+mat tanhPrime(mat&, bool);
 
-vec relu(vec&);
-vec reluPrime(vec&, bool);
+mat relu(mat&);
+mat reluPrime(mat&, bool);
+
+mat linear(mat&);
+mat linearPrime(mat&, bool);
+
+mat softmax(mat&);
+mat softmaxPrime(mat&, bool);
 
 template<typename T>
 std::ostream& operator<<(std::ostream& o, std::vector<T> v){
@@ -30,9 +36,42 @@ extern void hline();
 extern void checkPoint(std::string s="");
 
 extern bool prompt(std::string query);
-using tfun = vec (*)(vec&);
-using tfun_d = vec (*)(vec&,bool);
+using tfun = mat (*)(mat&);
+using tfun_d = mat (*)(mat&,bool);
 
+struct Randomizer{
+	std::random_device rd;
+	std::mt19937 eng;
+	std::uniform_real_distribution<float> dist;
+
+	Randomizer(float min, float max):
+		eng(rd()), dist(min,max){
+		}
+	float operator()(){
+		return dist(eng);
+	}
+
+	template<typename T>
+		void operator()(std::vector<T>& v){
+			// fill vector
+			for(auto& e : v){
+				e = (*this)();
+			}
+		}
+
+	template<typename T>
+		void operator()(T& e){
+			e = (*this)();
+		}
+	template<typename H, typename... T>
+		void operator()(H& head, T... tail){
+			(*this)(head);
+			(*this)(tail...);
+		}
+};
+
+extern float bound(float,float,float);
+extern float within(float,float,float);
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 

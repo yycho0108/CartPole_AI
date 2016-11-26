@@ -22,7 +22,7 @@ void Layer::setT(tfun f, tfun_d f_d){
 	this->f_d = f_d;
 }
 
-void Layer::transfer(vec v){
+void Layer::transfer(mat v){
 	_I.swap(v);
 	//_O = _I;
 	_O = f(_I);
@@ -32,12 +32,15 @@ void Layer::transfer(vec v){
 	//return _O;
 	//_I.for_each([]())
 }
-vec& Layer::I(){
+mat Layer::back_transfer(){
+	return f_d(_O, true);
+}
+mat& Layer::I(){
 	return _I;
 }
-vec& Layer::O(){
+mat& Layer::O(){
 	return _O;
 }
-vec& Layer::G(){
+mat& Layer::G(){
 	return _G;
 }

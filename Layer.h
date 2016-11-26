@@ -9,17 +9,18 @@ using namespace arma;
 class Layer{
 private:
 	int n; //size
-	vec _I,_O,_G;
+	mat _I,_O,_G;
 	tfun f;
 	tfun_d f_d;
 public:
 	Layer();
 	Layer(int n);
 	~Layer();
-	void transfer(vec);
-	vec& I();
-	vec& O();
-	vec& G();
+	void transfer(mat);
+	mat back_transfer();
+	mat& I();
+	mat& O();
+	mat& G();
 	void setSize(int);
 	void setT(tfun,tfun_d);
 	int size();

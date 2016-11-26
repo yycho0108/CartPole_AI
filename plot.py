@@ -20,7 +20,7 @@ def plotcsv(name):
 
             time = np.arange(sectorSize)
             #fit = np.polyfit(time,data_av,deg=3)
-            print("MAX : {}".format(min(data)))
+            print("MIN : {}".format(min(data)))
             print("MAX : {}".format(max(data)))
             print ("MEAN : {}".format(np.mean(data)))
             plt.plot(data_av,'o')
@@ -32,5 +32,5 @@ def plotcsv(name):
 
 plotcsv('loss.csv')
 plotcsv('train.csv')
-#plotcsv('test.csv')
-plotcsv('rewards.csv')
+plotcsv('up.csv')
+#plotcsv('rewards.csv')
